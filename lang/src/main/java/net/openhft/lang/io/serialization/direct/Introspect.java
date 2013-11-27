@@ -1,5 +1,7 @@
 package net.openhft.lang.io.serialization.direct;
 
+import net.openhft.lang.Maths;
+
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -31,7 +33,7 @@ public class Introspect {
 
         @Override
         public int compare(Field first, Field second) {
-            return Long.compare(offset(first), offset(second));
+            return Maths.compare(offset(first), offset(second));
         }
 
         private static long offset(Field field) {
