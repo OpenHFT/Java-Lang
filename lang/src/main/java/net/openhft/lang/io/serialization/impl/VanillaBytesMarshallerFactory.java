@@ -22,7 +22,7 @@ import net.openhft.lang.io.serialization.BytesMarshallerFactory;
 import net.openhft.lang.io.serialization.CompactBytesMarshaller;
 import net.openhft.lang.model.constraints.NotNull;
 
-import java.io.Externalizable;
+import java.io.*;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,6 +31,8 @@ import java.util.Map;
  * @author peter.lawrey
  */
 public class VanillaBytesMarshallerFactory implements BytesMarshallerFactory {
+
+    public static ObjectStreamFactory defaultOSFactory = new JDKSerialization();
 
     private Map<Class, BytesMarshaller> marshallerMap;
     private BytesMarshaller[] compactMarshallerMap;
@@ -82,5 +84,15 @@ public class VanillaBytesMarshallerFactory implements BytesMarshallerFactory {
         marshallerMap.put(eClass, marshaller);
         if (marshaller instanceof CompactBytesMarshaller)
             compactMarshallerMap[((CompactBytesMarshaller) marshaller).code()] = marshaller;
+    }
+
+    @Override
+    public ObjectOutput getObjectOutput(OutputStream out) throws IOException {
+        return defaultOSFactory.getObjectOutput(out);
+    }
+
+    @Override
+    public ObjectInput getObjectInput(InputStream in) throws IOException {
+        return defaultOSFactory.getObjectInput(in);
     }
 }

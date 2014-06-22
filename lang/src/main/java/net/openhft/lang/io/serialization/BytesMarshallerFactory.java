@@ -16,16 +16,20 @@
 
 package net.openhft.lang.io.serialization;
 
+import net.openhft.lang.io.serialization.impl.ObjectStreamFactory;
 import net.openhft.lang.model.constraints.NotNull;
+
+import java.io.*;
 
 /**
  * @author peter.lawrey
  */
-public interface BytesMarshallerFactory {
+public interface BytesMarshallerFactory extends ObjectStreamFactory {
     @NotNull
     <E> BytesMarshaller<E> acquireMarshaller(@NotNull Class<E> eClass, boolean create);
 
     <E> BytesMarshaller<E> getMarshaller(byte code);
 
     <E> void addMarshaller(Class<E> eClass, BytesMarshaller<E> marshaller);
+
 }

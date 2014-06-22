@@ -1872,7 +1872,7 @@ public abstract class AbstractBytes implements Bytes {
             }
             case SERIALIZED: {
                 try {
-                    return new ObjectInputStream(this.inputStream()).readObject();
+                    return bytesMarshallerFactory.getObjectInput(this.inputStream()).readObject();
                 } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
@@ -1951,8 +1951,9 @@ public abstract class AbstractBytes implements Bytes {
         writeByte(SERIALIZED);
         // TODO this is the lame implementation, but it works.
         try {
-            ObjectOutputStream oos = new ObjectOutputStream(this.outputStream());
+            ObjectOutput oos = bytesMarshallerFactory.getObjectOutput(this.outputStream());
             oos.writeObject(obj);
+            oos.flush();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
