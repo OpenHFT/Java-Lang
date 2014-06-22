@@ -37,7 +37,7 @@
     <modules>
         <module>lang</module>
         <!--<module>lang-sandbox</module>-->
-        <module>lang-test</module>
+        <!--<module>lang-test</module>-->
     </modules>
 
 </project>
