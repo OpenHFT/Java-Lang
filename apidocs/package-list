@@ -10,4 +10,5 @@ net.openhft.lang.model.constraints
 net.openhft.lang.pool
 net.openhft.lang.testing
 net.openhft.lang.thread
+net.openhft.lang.threadlocal
 net.openhft.lang.values
