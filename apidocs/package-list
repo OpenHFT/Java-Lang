@@ -5,6 +5,7 @@ net.openhft.lang.io
 net.openhft.lang.io.serialization
 net.openhft.lang.io.serialization.impl
 net.openhft.lang.io.view
+net.openhft.lang.locks
 net.openhft.lang.model
 net.openhft.lang.model.constraints
 net.openhft.lang.pool
