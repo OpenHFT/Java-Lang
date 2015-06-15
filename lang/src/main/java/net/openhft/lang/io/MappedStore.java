@@ -35,6 +35,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MappedStore implements BytesStore, Closeable {
 
@@ -166,9 +168,15 @@ public class MappedStore implements BytesStore, Closeable {
         return file;
     }
 
-    static class Unmapper implements Runnable {
+    private static final class Unmapper implements Runnable {
         private final long size;
         private final FileChannel channel;
+        /*
+         * This is not for synchronization (since calling this from multiple
+         * threads through .free / .close is an user error!) but rather to make
+         * sure that if an explicit cleanup was performed, the cleaner does not
+         * retry cleaning up the resources.
+         */
         private volatile long address;
 
         Unmapper(long address, long size, FileChannel channel) {
@@ -186,13 +194,16 @@ public class MappedStore implements BytesStore, Closeable {
                 unmap0(address, size);
                 address = 0;
 
-                if (channel.isOpen()) {
-                    channel.force(true);
-                    channel.close();
-                }
+                channel.force(true);
+                channel.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                UnmapperLoggerHolder.LOGGER.log(Level.SEVERE,
+                    "An exception has occurred while cleaning up a MappedStore instance: " + e.getMessage(), e);
             }
+        }
+
+        private static final class UnmapperLoggerHolder {
+            private static final Logger LOGGER = Logger.getLogger(Unmapper.class.getName());
         }
     }
 }
