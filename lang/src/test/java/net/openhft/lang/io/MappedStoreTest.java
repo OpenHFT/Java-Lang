@@ -51,7 +51,7 @@ public class MappedStoreTest {
 
         slice.release();
 
-        ms.free();
+        ms.close();
     }
 
     @Test
@@ -67,7 +67,7 @@ public class MappedStoreTest {
             slice1.writeLong(2L);
             slice1.release();
 
-            ms1.free();
+            ms1.close();
         }
 
         {
@@ -79,7 +79,7 @@ public class MappedStoreTest {
 
             slice2.release();
 
-            ms2.free();
+            ms2.close();
         }
     }
 
@@ -104,7 +104,7 @@ public class MappedStoreTest {
     // Helpers
     // *************************************************************************
 
-    private static File getStoreFile(String fileName) {
+    static File getStoreFile(String fileName) {
         File file = new File(System.getProperty("java.io.tmpdir"),fileName);
         file.delete();
         file.deleteOnExit();
