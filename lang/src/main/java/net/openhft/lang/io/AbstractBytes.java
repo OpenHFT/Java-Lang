@@ -99,6 +99,8 @@ public abstract class AbstractBytes implements Bytes {
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final byte[] RADIX = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes();
     private static final StringBuilderPool sbp = new StringBuilderPool();
+    private static final SimpleByteCountListenerPool sbclp = new SimpleByteCountListenerPool();
+    private static final ForwardingByteCountListenerPool fbclp = new ForwardingByteCountListenerPool();
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
     private static boolean ID_LIMIT_WARNED = false;
     final AtomicInteger refCount;
@@ -226,25 +228,35 @@ public abstract class AbstractBytes implements Bytes {
         throw new BufferUnderflowException();
     }
 
-    public void readUTF0(@NotNull Appendable appendable, int utflen)
-            throws IOException {
+    public int readUTF0(long offset, @NotNull Appendable appendable, int utflen) throws IOException {
         int count = 0;
+        int bytesRead = 0;
 
         while (count < utflen) {
-            int c = readUnsignedByteOrThrow();
+            int c = readUnsignedByte(offset++);
+            bytesRead++;
+
             if (c >= 128) {
-                position(position() - 1);
-                readUTF2(this, appendable, utflen, count);
+                bytesRead -= 1;
+                bytesRead += readUTF2(this, offset - 1, appendable, utflen, count);
                 break;
             }
+
             count++;
             appendable.append((char) c);
         }
+
+        return bytesRead;
     }
 
-    public static void readUTF2(Bytes bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
+    public static int readUTF2(Bytes bytes, long offset, @NotNull Appendable appendable, int utflen, int count)
+            throws IOException {
+        int bytesRead = 0;
+
         while (count < utflen) {
-            int c = bytes.readUnsignedByte();
+            int c = bytes.readUnsignedByte(offset++);
+            bytesRead += 1;
+
             switch (c >> 4) {
                 case 0:
                 case 1:
@@ -266,7 +278,8 @@ public abstract class AbstractBytes implements Bytes {
                     if (count > utflen)
                         throw new UTFDataFormatException(
                                 "malformed input: partial character at end");
-                    int char2 = bytes.readUnsignedByte();
+                    int char2 = bytes.readUnsignedByte(offset++);
+                    bytesRead += 1;
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
                                 "malformed input around byte " + count + " was " + char2);
@@ -282,8 +295,9 @@ public abstract class AbstractBytes implements Bytes {
                     if (count > utflen)
                         throw new UTFDataFormatException(
                                 "malformed input: partial character at end");
-                    int char2 = bytes.readUnsignedByte();
-                    int char3 = bytes.readUnsignedByte();
+                    int char2 = bytes.readUnsignedByte(offset++);
+                    int char3 = bytes.readUnsignedByte(offset++);
+                    bytesRead += 2;
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
                         throw new UTFDataFormatException(
@@ -301,6 +315,8 @@ public abstract class AbstractBytes implements Bytes {
                             "malformed input around byte " + count);
             }
         }
+
+        return bytesRead;
     }
 
     public static long findUTFLength(@NotNull CharSequence str) {
@@ -679,17 +695,22 @@ public abstract class AbstractBytes implements Bytes {
         return null;
     }
 
-    // locking at it temporarily changes position.
-    // todo write a version without changing the position.
     @Nullable
     @Override
-    public synchronized String readUTFΔ(long offset) throws IllegalStateException {
-        long position = position();
+    public String readUTFΔ(long offset) throws IllegalStateException {
+        return readUTFΔ(offset, NullByteCountListener.getInstance());
+    }
+
+    @Nullable
+    @Override
+    public String readUTFΔ(long offset, ByteCountListener byteCountListener) throws IllegalStateException {
+        StringBuilder utfReader = acquireStringBuilder();
         try {
-            position(offset);
-            return readUTFΔ();
-        } finally {
-            position(position);
+            if (!appendUTF0(offset, utfReader, byteCountListener))
+                return null;
+            return utfReader.length() == 0 ? "" : stringInterner().intern(utfReader);
+        } catch (IOException unexpected) {
+            throw new IllegalStateException(unexpected);
         }
     }
 
@@ -701,24 +722,35 @@ public abstract class AbstractBytes implements Bytes {
     @Override
     public boolean readUTFΔ(@NotNull StringBuilder stringBuilder) {
         try {
+            SimpleByteCountListener byteCountListener = sbclp.acquireByteCountListener();
             stringBuilder.setLength(0);
-            return appendUTF0(stringBuilder);
+            boolean result = appendUTF0(position(), stringBuilder, byteCountListener);
+            skip(byteCountListener.getByteCount());
+            return result;
         } catch (IOException unexpected) {
             throw new IllegalStateException(unexpected);
         }
     }
 
     @SuppressWarnings("MagicNumber")
-    private boolean appendUTF0(@NotNull Appendable appendable) throws IOException {
-        long len = readStopBit();
+    private boolean appendUTF0(long offset, @NotNull Appendable appendable, ByteCountListener byteCountListener)
+            throws IOException {
+        ForwardingByteCountListener forwardingByteCountListener = fbclp.acquireByteCountListener();
+        forwardingByteCountListener.setWrapped(byteCountListener);
+        long len = readStopBit(offset, forwardingByteCountListener);
+        forwardingByteCountListener.setWrapped(null);
+
         if (len == -1)
             return false;
         else if (len == 0)
             return true;
         if (len < -1 || len > remaining())
             throw new StreamCorruptedException("UTF length invalid " + len + " remaining: " + remaining());
+
         int utflen = (int) len;
-        readUTF0(appendable, utflen);
+        offset += forwardingByteCountListener.getByteCount();
+        int bytesRead = readUTF0(offset, appendable, utflen);
+        byteCountListener.bytesProcessed(bytesRead);
         return true;
     }
 
@@ -836,7 +868,8 @@ public abstract class AbstractBytes implements Bytes {
         try {
             int len = readUnsignedShort();
             StringBuilder utfReader = acquireStringBuilder();
-            readUTF0(utfReader, len);
+            int bytesRead = readUTF0(position(), utfReader, len);
+            skip(bytesRead);
             return utfReader.length() == 0 ? "" : stringInterner().intern(utfReader);
         } catch (IOException unexpected) {
             throw new AssertionError(unexpected);
@@ -956,20 +989,42 @@ public abstract class AbstractBytes implements Bytes {
 
     @Override
     public long readStopBit() {
-        long l;
-        if ((l = readByte()) >= 0)
-            return l;
-        return readStopBit0(l);
+        SimpleByteCountListener sbcl = sbclp.acquireByteCountListener();
+        long result = readStopBit(position(), sbcl);
+        skip(sbcl.getByteCount());
+        return result;
     }
 
-    private long readStopBit0(long l) {
+    @Override
+    public long readStopBit(long offset) {
+        return readStopBit(offset, NullByteCountListener.getInstance());
+    }
+
+    @Override
+    public long readStopBit(long offset, ByteCountListener byteCountListener) {
+        long l = readByte(offset);
+        byteCountListener.bytesProcessed(1);
+        if (l >= 0)
+            return l;
+        return readStopBit0(offset + 1, l, byteCountListener);
+    }
+
+    private long readStopBit0(long offset, long l, ByteCountListener byteCountListener) {
         l &= 0x7FL;
         long b;
         int count = 7;
-        while ((b = readByte()) < 0) {
-            l |= (b & 0x7FL) << count;
-            count += 7;
+        while (true) {
+            b = readByte(offset);
+            byteCountListener.bytesProcessed(1);
+            offset += 1;
+            if (b >= 0) {
+                break;
+            } else {
+                l |= (b & 0x7FL) << count;
+                count += 7;
+            }
         }
+
         if (b != 0) {
             if (count > 56)
                 throw new IllegalStateException(
