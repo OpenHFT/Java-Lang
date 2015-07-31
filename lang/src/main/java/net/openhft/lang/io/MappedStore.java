@@ -56,11 +56,19 @@ public class MappedStore implements BytesStore, Closeable {
     }
 
     @Deprecated
-    public MappedStore(File file, FileChannel.MapMode mode, long size, BytesMarshallerFactory bytesMarshallerFactory) throws IOException {
-        this(file, mode, size, BytesMarshallableSerializer.create(bytesMarshallerFactory, JDKZObjectSerializer.INSTANCE));
+    public MappedStore(File file, FileChannel.MapMode mode, long size,
+                       BytesMarshallerFactory bytesMarshallerFactory) throws IOException {
+        this(file, mode, size, BytesMarshallableSerializer.create(
+                bytesMarshallerFactory, JDKZObjectSerializer.INSTANCE));
     }
 
-    public MappedStore(File file, FileChannel.MapMode mode, long size, ObjectSerializer objectSerializer) throws IOException {
+    public MappedStore(File file, FileChannel.MapMode mode, long size,
+                       ObjectSerializer objectSerializer) throws IOException {
+        this(file, mode, 0L, size, objectSerializer);
+    }
+
+    public MappedStore(File file, FileChannel.MapMode mode, long startInFile, long size,
+                       ObjectSerializer objectSerializer) throws IOException {
         if (size < 0 || size > 128L << 40) {
             throw new IllegalArgumentException("invalid size: " + size);
         }
@@ -71,31 +79,36 @@ public class MappedStore implements BytesStore, Closeable {
 
         try {
             RandomAccessFile raf = new RandomAccessFile(file, accesModeFor(mode));
-            if (raf.length() != this.size && !file.getAbsolutePath().startsWith("/dev/")) {
+            if ((raf.length() < startInFile + size || (startInFile == 0 && raf.length() != size))
+                    && !file.getAbsolutePath().startsWith("/dev/")) {
                 if (mode != FileChannel.MapMode.READ_WRITE) {
-                    throw new IOException("Cannot resize file to " + size + " as mode is not READ_WRITE");
+                    throw new IOException(
+                            "Cannot resize file to " + size + " as mode is not READ_WRITE");
                 }
 
-                raf.setLength(this.size);
+                raf.setLength(startInFile + size);
             }
 
             this.fileChannel = raf.getChannel();
-            this.address = map0(fileChannel, imodeFor(mode), 0L, size);
+            this.address = map0(fileChannel, imodeFor(mode), startInFile, size);
             this.cleaner = Cleaner.create(this, new Unmapper(address, size, fileChannel));
         } catch (Exception e) {
             throw wrap(e);
         }
     }
 
-    private static long map0(FileChannel fileChannel, int imode, long start, long size) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method map0 = fileChannel.getClass().getDeclaredMethod("map0", int.class, long.class, long.class);
+    private static long map0(FileChannel fileChannel, int imode, long start, long size)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Method map0 = fileChannel.getClass().getDeclaredMethod(
+                "map0", int.class, long.class, long.class);
         map0.setAccessible(true);
         return (Long) map0.invoke(fileChannel, imode, start, size);
     }
 
     private static void unmap0(long address, long size) throws IOException {
         try {
-            Method unmap0 = FileChannelImpl.class.getDeclaredMethod("unmap0", long.class, long.class);
+            Method unmap0 = FileChannelImpl.class.getDeclaredMethod(
+                    "unmap0", long.class, long.class);
             unmap0.setAccessible(true);
             unmap0.invoke(null, address, size);
         } catch (Exception e) {
@@ -196,7 +209,8 @@ public class MappedStore implements BytesStore, Closeable {
                 channel.close();
             } catch (IOException e) {
                 UnmapperLoggerHolder.LOGGER.log(Level.SEVERE,
-                    "An exception has occurred while cleaning up a MappedStore instance: " + e.getMessage(), e);
+                    "An exception has occurred while cleaning up a MappedStore instance: " +
+                            e.getMessage(), e);
             }
         }
 
