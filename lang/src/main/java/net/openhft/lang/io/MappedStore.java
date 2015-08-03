@@ -32,50 +32,21 @@ public class MappedStore extends AbstractMappedStore {
     }
 
     @Deprecated
-    public MappedStore(File file, FileChannel.MapMode mode, long size, BytesMarshallerFactory bytesMarshallerFactory) throws IOException {
-        this(file, mode, size, BytesMarshallableSerializer.create(bytesMarshallerFactory, JDKZObjectSerializer.INSTANCE));
+    public MappedStore(File file, FileChannel.MapMode mode, long size,
+            BytesMarshallerFactory bytesMarshallerFactory) throws IOException {
+        this(file, mode, size, BytesMarshallableSerializer.create(
+                bytesMarshallerFactory, JDKZObjectSerializer.INSTANCE));
     }
 
-    public MappedStore(File file, FileChannel.MapMode mode, long size, ObjectSerializer objectSerializer) throws IOException {
-        super(new ReadOnlyMmapInfoHolder(), file, mode, size, objectSerializer);
-        ((ReadOnlyMmapInfoHolder)mmapInfoHolder).lock();
+    public MappedStore(File file, FileChannel.MapMode mode, long size,
+            ObjectSerializer objectSerializer) throws IOException {
+        this(file, mode, 0L, size, objectSerializer);
     }
 
-    private static final class ReadOnlyMmapInfoHolder extends MmapInfoHolder {
-        private long address, size;
-        private boolean locked;
-
-        private void checkLock() {
-            if (locked) {
-                throw new IllegalStateException();
-            }
-        }
-
-        void lock() {
-            this.locked = true;
-        }
-
-        @Override
-        void setAddress(long address) {
-            checkLock();
-            this.address = address;
-        }
-
-        @Override
-        long getAddress() {
-            return address;
-        }
-
-        @Override
-        void setSize(long size) {
-            checkLock();
-            this.size = size;
-        }
-
-        @Override
-        long getSize() {
-            return size;
-        }
+    public MappedStore(File file, FileChannel.MapMode mode, long startInFile, long size,
+            ObjectSerializer objectSerializer) throws IOException {
+        super(new MmapInfoHolder(), file, mode, startInFile, size, objectSerializer);
+        mmapInfoHolder.lock();
     }
 }
 

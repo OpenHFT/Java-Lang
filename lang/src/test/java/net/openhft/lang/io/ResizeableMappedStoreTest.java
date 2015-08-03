@@ -24,7 +24,7 @@ import java.nio.channels.FileChannel;
 import org.junit.After;
 import org.junit.Test;
 
-public final class ResizableMappedStoreTest {
+public final class ResizeableMappedStoreTest {
     @After
     public void tearDown() {
         System.gc();
@@ -37,7 +37,7 @@ public final class ResizableMappedStoreTest {
         final int smallSize = 1024, largeSize = 10 * smallSize;
 
         {
-            ResizableMappedStore ms = new ResizableMappedStore(file, FileChannel.MapMode.READ_WRITE, smallSize);
+            ResizeableMappedStore ms = new ResizeableMappedStore(file, FileChannel.MapMode.READ_WRITE, smallSize);
 
             DirectBytes slice1 = ms.bytes();
             for (int i = 0; i < smallSize; ++i) {
@@ -58,7 +58,7 @@ public final class ResizableMappedStoreTest {
         assertEquals(largeSize, file.length());
 
         {
-            ResizableMappedStore ms = new ResizableMappedStore(file, FileChannel.MapMode.READ_WRITE, file.length());
+            ResizeableMappedStore ms = new ResizeableMappedStore(file, FileChannel.MapMode.READ_WRITE, file.length());
             DirectBytes slice = ms.bytes();
             assertEquals(42, slice.readByte(smallSize - 1));
             assertEquals(24, slice.readByte(largeSize - 1));

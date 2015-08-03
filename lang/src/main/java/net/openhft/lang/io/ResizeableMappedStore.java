@@ -24,13 +24,13 @@ import net.openhft.lang.io.serialization.JDKZObjectSerializer;
 import net.openhft.lang.io.serialization.ObjectSerializer;
 import net.openhft.lang.io.serialization.impl.VanillaBytesMarshallerFactory;
 
-public final class ResizableMappedStore extends AbstractMappedStore {
-    public ResizableMappedStore(File file, FileChannel.MapMode mode, long size) throws IOException {
+public final class ResizeableMappedStore extends AbstractMappedStore {
+    public ResizeableMappedStore(File file, FileChannel.MapMode mode, long size) throws IOException {
         this(file, mode, size, BytesMarshallableSerializer.create(new VanillaBytesMarshallerFactory(), JDKZObjectSerializer.INSTANCE));
     }
 
-    public ResizableMappedStore(File file, FileChannel.MapMode mode, long size, ObjectSerializer objectSerializer) throws IOException {
-        super(new ReadWriteMmapInfoHolder(), file, mode, size, objectSerializer);
+    public ResizeableMappedStore(File file, FileChannel.MapMode mode, long size, ObjectSerializer objectSerializer) throws IOException {
+        super(new MmapInfoHolder(), file, mode, 0L, size, objectSerializer);
     }
 
 
@@ -47,32 +47,8 @@ public final class ResizableMappedStore extends AbstractMappedStore {
     public void resize(long newSize) throws IOException {
         validateSize(newSize);
         unmapAndSyncToDisk();
-        resizeIfNeeded(newSize);
+        resizeIfNeeded(0L, newSize);
         this.mmapInfoHolder.setSize(newSize);
-        map();
-    }
-
-    private static final class ReadWriteMmapInfoHolder extends MmapInfoHolder {
-        private long address, size;
-
-        @Override
-        void setAddress(long address) {
-            this.address = address;
-        }
-
-        @Override
-        long getAddress() {
-            return address;
-        }
-
-        @Override
-        void setSize(long size) {
-            this.size = size;
-        }
-
-        @Override
-        long getSize() {
-            return size;
-        }
+        map(0L);
     }
 }

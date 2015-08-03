@@ -45,7 +45,7 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
     protected final MmapInfoHolder mmapInfoHolder;
     private ObjectSerializer objectSerializer;
 
-    AbstractMappedStore(MmapInfoHolder mmapInfoHolder, File file, FileChannel.MapMode mode, long size, ObjectSerializer objectSerializer) throws IOException {
+    AbstractMappedStore(MmapInfoHolder mmapInfoHolder, File file, FileChannel.MapMode mode, long startInFile, long size, ObjectSerializer objectSerializer) throws IOException {
         validateSize(size);
         this.file = file;
         this.mmapInfoHolder = mmapInfoHolder;
@@ -55,26 +55,34 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
 
         try {
             this.raf = new RandomAccessFile(file, accesModeFor(mode));
-            resizeIfNeeded(size);
-            map();
+            resizeIfNeeded(startInFile, size);
+            map(startInFile);
             this.cleaner = Cleaner.create(this, new Unmapper(mmapInfoHolder, raf));
         } catch (Exception e) {
             throw wrap(e);
         }
     }
 
-    protected final void validateSize(long size) {
+    protected static void validateSize(long size) {
         if (size <= 0 || size > 128L << 40) {
             throw new IllegalArgumentException("invalid size: " + size);
         }
     }
 
-    protected final void resizeIfNeeded(long newSize) throws IOException {
-        if (raf.length() == newSize) {
-            return;
-        }
+    protected final void resizeIfNeeded(long startInFile, long newSize) throws IOException {
         if (file.getAbsolutePath().startsWith("/dev/")) {
             return;
+        }
+        if (startInFile > 0) {
+            if (raf.length() >= startInFile + newSize) {
+                return;
+            }
+        } else if (startInFile == 0) {
+            if (raf.length() == newSize) {
+                return;
+            }
+        } else {
+            throw new IllegalArgumentException("Start offset in file needs to be positive: " + startInFile);
         }
         if (mode != FileChannel.MapMode.READ_WRITE) {
             throw new IOException("Cannot resize file to " + newSize + " as mode is not READ_WRITE");
@@ -83,9 +91,9 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
         raf.setLength(newSize);
     }
 
-    protected final void map() throws IOException {
+    protected final void map(long startInFile) throws IOException {
         try {
-            mmapInfoHolder.setAddress(map0(raf.getChannel(), imodeFor(mode), 0L, mmapInfoHolder.getSize()));
+            mmapInfoHolder.setAddress(map0(raf.getChannel(), imodeFor(mode), startInFile, mmapInfoHolder.getSize()));
         } catch (Exception e) {
             throw wrap(e);
         }
@@ -175,14 +183,37 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
         return file;
     }
 
-    abstract static class MmapInfoHolder {
-        abstract void setAddress(long address);
+    static final class MmapInfoHolder {
+        private long address, size;
+        private volatile boolean locked;
 
-        abstract long getAddress();
+        private void checkLock() {
+            if (locked) {
+                throw new IllegalStateException();
+            }
+        }
 
-        abstract void setSize(long size);
+        void lock() {
+            this.locked = true;
+        }
 
-        abstract long getSize();
+        void setAddress(long address) {
+            checkLock();
+            this.address = address;
+        }
+
+        long getAddress() {
+            return address;
+        }
+
+        void setSize(long size) {
+            checkLock();
+            this.size = size;
+        }
+
+        long getSize() {
+            return size;
+        }
     }
 
     private static final class Unmapper implements Runnable {
