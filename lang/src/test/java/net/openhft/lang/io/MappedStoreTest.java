@@ -17,6 +17,8 @@
 package net.openhft.lang.io;
 
 import net.openhft.lang.Jvm;
+import net.openhft.lang.io.serialization.JDKZObjectSerializer;
+
 import org.junit.After;
 import org.junit.Test;
 
@@ -51,7 +53,7 @@ public class MappedStoreTest {
 
         slice.release();
 
-        ms.free();
+        ms.close();
     }
 
     @Test
@@ -67,7 +69,7 @@ public class MappedStoreTest {
             slice1.writeLong(2L);
             slice1.release();
 
-            ms1.free();
+            ms1.close();
         }
 
         {
@@ -79,8 +81,25 @@ public class MappedStoreTest {
 
             slice2.release();
 
-            ms2.free();
+            ms2.close();
         }
+    }
+
+    @Test
+    public void testCreateMappedStoreWithOffset() throws IOException {
+        final int _4k = 4 * 1024, _8k = 8 * 1024;
+
+        File file = getStoreFile("mapped-store-3.tmp");
+        fill(file, _8k);
+
+        MappedStore ms = new MappedStore(file, FileChannel.MapMode.READ_WRITE, _4k, _8k, JDKZObjectSerializer.INSTANCE);
+        Bytes bytes = ms.bytes();
+
+        assertEquals(1, bytes.readByte(1));
+        assertEquals(0, bytes.readByte(_4k));
+
+        bytes.release();
+        ms.close();
     }
 
     /*
@@ -104,7 +123,17 @@ public class MappedStoreTest {
     // Helpers
     // *************************************************************************
 
-    private static File getStoreFile(String fileName) {
+    private void fill(File file, int expectedSize) throws IOException {
+        MappedStore ms = new MappedStore(file, FileChannel.MapMode.READ_WRITE, expectedSize);
+        Bytes bytes = ms.bytes();
+        for (int i = 0; i < expectedSize; ++i) {
+            bytes.writeUnsignedByte(i);
+        }
+        bytes.release();
+        ms.close();
+    }
+
+    static File getStoreFile(String fileName) {
         File file = new File(System.getProperty("java.io.tmpdir"),fileName);
         file.delete();
         file.deleteOnExit();
