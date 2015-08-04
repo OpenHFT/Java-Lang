@@ -25,11 +25,14 @@ import net.openhft.lang.io.serialization.ObjectSerializer;
 import net.openhft.lang.io.serialization.impl.VanillaBytesMarshallerFactory;
 
 public final class ResizeableMappedStore extends AbstractMappedStore {
-    public ResizeableMappedStore(File file, FileChannel.MapMode mode, long size) throws IOException {
-        this(file, mode, size, BytesMarshallableSerializer.create(new VanillaBytesMarshallerFactory(), JDKZObjectSerializer.INSTANCE));
+    public ResizeableMappedStore(File file, FileChannel.MapMode mode, long size)
+            throws IOException {
+        this(file, mode, size, BytesMarshallableSerializer.create(
+                new VanillaBytesMarshallerFactory(), JDKZObjectSerializer.INSTANCE));
     }
 
-    public ResizeableMappedStore(File file, FileChannel.MapMode mode, long size, ObjectSerializer objectSerializer) throws IOException {
+    public ResizeableMappedStore(File file, FileChannel.MapMode mode, long size,
+                                 ObjectSerializer objectSerializer) throws IOException {
         super(new MmapInfoHolder(), file, mode, 0L, size, objectSerializer);
     }
 

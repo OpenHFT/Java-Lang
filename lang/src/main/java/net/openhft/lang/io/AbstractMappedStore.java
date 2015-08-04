@@ -45,7 +45,9 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
     protected final MmapInfoHolder mmapInfoHolder;
     private ObjectSerializer objectSerializer;
 
-    AbstractMappedStore(MmapInfoHolder mmapInfoHolder, File file, FileChannel.MapMode mode, long startInFile, long size, ObjectSerializer objectSerializer) throws IOException {
+    AbstractMappedStore(MmapInfoHolder mmapInfoHolder, File file, FileChannel.MapMode mode,
+                        long startInFile, long size, ObjectSerializer objectSerializer)
+            throws IOException {
         validateSize(size);
         this.file = file;
         this.mmapInfoHolder = mmapInfoHolder;
@@ -82,10 +84,12 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
                 return;
             }
         } else {
-            throw new IllegalArgumentException("Start offset in file needs to be positive: " + startInFile);
+            throw new IllegalArgumentException(
+                    "Start offset in file needs to be positive: " + startInFile);
         }
         if (mode != FileChannel.MapMode.READ_WRITE) {
-            throw new IOException("Cannot resize file to " + newSize + " as mode is not READ_WRITE");
+            throw new IOException(
+                    "Cannot resize file to " + newSize + " as mode is not READ_WRITE");
         }
 
         raf.setLength(startInFile + newSize);
@@ -93,7 +97,8 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
 
     protected final void map(long startInFile) throws IOException {
         try {
-            mmapInfoHolder.setAddress(map0(raf.getChannel(), imodeFor(mode), startInFile, mmapInfoHolder.getSize()));
+            mmapInfoHolder.setAddress(
+                    map0(raf.getChannel(), imodeFor(mode), startInFile, mmapInfoHolder.getSize()));
         } catch (Exception e) {
             throw wrap(e);
         }
@@ -104,15 +109,18 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
         raf.getChannel().force(true);
     }
 
-    private static long map0(FileChannel fileChannel, int imode, long start, long size) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method map0 = fileChannel.getClass().getDeclaredMethod("map0", int.class, long.class, long.class);
+    private static long map0(FileChannel fileChannel, int imode, long start, long size)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Method map0 = fileChannel.getClass().getDeclaredMethod(
+                "map0", int.class, long.class, long.class);
         map0.setAccessible(true);
         return (Long) map0.invoke(fileChannel, imode, start, size);
     }
 
     private static void unmap0(long address, long size) throws IOException {
         try {
-            Method unmap0 = FileChannelImpl.class.getDeclaredMethod("unmap0", long.class, long.class);
+            Method unmap0 = FileChannelImpl.class.getDeclaredMethod(
+                    "unmap0", long.class, long.class);
             unmap0.setAccessible(true);
             unmap0.invoke(null, address, size);
         } catch (Exception e) {
@@ -245,7 +253,8 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
                 raf.close();
             } catch (IOException e) {
                 UnmapperLoggerHolder.LOGGER.log(Level.SEVERE,
-                    "An exception has occurred while cleaning up a MappedStore instance: " + e.getMessage(), e);
+                    "An exception has occurred while cleaning up a MappedStore instance: " +
+                            e.getMessage(), e);
             }
         }
     }
