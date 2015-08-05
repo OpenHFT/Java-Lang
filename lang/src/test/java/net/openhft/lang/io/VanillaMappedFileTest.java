@@ -348,7 +348,8 @@ public class VanillaMappedFileTest {
     @Test
     public void testMessageKeySerialization() throws IOException {
         File path = newTempraryFile("vmc-x");
-        VanillaMappedBytes bytes = VanillaMappedFile.readWriteBytes(path,1024,0);
+        VanillaMappedBytes bytes = VanillaMappedFile.readWriteBytes(path, 1024, 0,
+                FileLifecycleListener.FileLifecycleListeners.CONSOLE);
 
         bytes.writeObject(new MessageKey("type", 123L));
         bytes.flush();

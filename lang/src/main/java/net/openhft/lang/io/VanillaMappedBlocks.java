@@ -24,16 +24,19 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
     private final VanillaMappedFile mappedFile;
     private final List<VanillaMappedBytes> bytes;
     private final long blockSize;
+    private final FileLifecycleListener fileLifecycleListener;
 
     private VanillaMappedBytes mb0;
     private VanillaMappedBytes mb1;
 
     public VanillaMappedBlocks(final File path, VanillaMappedMode mode, long blockSize, long overlapSize) throws IOException {
-        this(path,mode,blockSize + overlapSize);
+        this(path, mode, blockSize + overlapSize, null);
     }
 
-    public VanillaMappedBlocks(final File path, VanillaMappedMode mode, long blockSize) throws IOException {
-        this.mappedFile = new VanillaMappedFile(path,mode,-1);
+    public VanillaMappedBlocks(final File path, VanillaMappedMode mode, long blockSize,
+                               FileLifecycleListener fileLifecycleListener) throws IOException {
+        this.fileLifecycleListener = fileLifecycleListener;
+        this.mappedFile = new VanillaMappedFile(path, mode, -1, fileLifecycleListener);
         this.bytes = new ArrayList<VanillaMappedBytes>();
         this.blockSize = blockSize;
         this.mb0 = null;
@@ -41,12 +44,12 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
     }
 
     public synchronized VanillaMappedBytes acquire(long index) throws IOException {
-        if(this.mb0 != null && this.mb0.index() == index) {
+        if (this.mb0 != null && this.mb0.index() == index) {
             this.mb0.reserve();
             return this.mb0;
         }
 
-        if(this.mb1 != null && this.mb1.index() == index) {
+        if (this.mb1 != null && this.mb1.index() == index) {
             this.mb1.reserve();
             return this.mb1;
         }
@@ -56,7 +59,7 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
 
     protected VanillaMappedBytes acquire0(long index) throws IOException {
 
-        if(this.mb1 != null) {
+        if (this.mb1 != null) {
             this.mb1.release();
         }
 
@@ -67,7 +70,7 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
         bytes.add(this.mb0);
 
         for (int i = bytes.size() - 1; i >= 0; i--) {
-            if(bytes.get(i).unmapped()) {
+            if (bytes.get(i).unmapped()) {
                 bytes.remove(i);
             }
         }
@@ -87,12 +90,12 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
 
     @Override
     public synchronized void close() throws IOException {
-        if(this.mb0 != null && !this.mb0.unmapped()) {
+        if (this.mb0 != null && !this.mb0.unmapped()) {
             this.mb0.release();
             this.mb0 = null;
         }
 
-        if(this.mb1 != null && !this.mb1.unmapped()) {
+        if (this.mb1 != null && !this.mb1.unmapped()) {
             this.mb1.release();
             this.mb1 = null;
         }
@@ -102,9 +105,9 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
         for (VanillaMappedBytes vmb : this.bytes) {
             //if (!vmb.unmapped()) {
             //    vmb.release();
-                //if (!vmb.unmapped()) {
-                //    count++;
-                //}
+            //if (!vmb.unmapped()) {
+            //    count++;
+            //}
             //}
 
             vmb.cleanup();
@@ -119,10 +122,20 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
     }
 
     public static VanillaMappedBlocks readWrite(final File path, long size) throws IOException {
-        return new VanillaMappedBlocks(path,VanillaMappedMode.RW,size);
+        return readWrite(path, size, FileLifecycleListener.FileLifecycleListeners.IGNORE);
     }
 
     public static VanillaMappedBlocks readOnly(final File path, long size) throws IOException {
-        return new VanillaMappedBlocks(path,VanillaMappedMode.RO,size);
+        return readOnly(path, size, FileLifecycleListener.FileLifecycleListeners.IGNORE);
+    }
+
+    public static VanillaMappedBlocks readWrite(final File path, long size,
+                                                FileLifecycleListener listener) throws IOException {
+        return new VanillaMappedBlocks(path, VanillaMappedMode.RW, size, listener);
+    }
+
+    public static VanillaMappedBlocks readOnly(final File path, long size,
+                                               FileLifecycleListener listener) throws IOException {
+        return new VanillaMappedBlocks(path, VanillaMappedMode.RO, size, listener);
     }
 }
