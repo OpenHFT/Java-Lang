@@ -18,7 +18,6 @@ package net.openhft.lang.io;
 
 import net.openhft.lang.Jvm;
 import net.openhft.lang.io.serialization.JDKZObjectSerializer;
-
 import org.junit.After;
 import org.junit.Test;
 
@@ -87,16 +86,17 @@ public class MappedStoreTest {
 
     @Test
     public void testCreateMappedStoreWithOffset() throws IOException {
-        final int _4k = 4 * 1024, _8k = 8 * 1024;
+        final int _64k = 64 * 1024, _128k = 128 * 1024;
 
         File file = getStoreFile("mapped-store-3.tmp");
-        fill(file, _8k);
+        fill(file, _128k);
 
-        MappedStore ms = new MappedStore(file, FileChannel.MapMode.READ_WRITE, _4k, _8k, JDKZObjectSerializer.INSTANCE);
+        MappedStore ms = new MappedStore(file, FileChannel.MapMode.READ_WRITE,
+                _64k, _128k, JDKZObjectSerializer.INSTANCE);
         Bytes bytes = ms.bytes();
 
         assertEquals(1, bytes.readByte(1));
-        assertEquals(0, bytes.readByte(_4k));
+        assertEquals(0, bytes.readByte(_64k));
 
         bytes.release();
         ms.close();
