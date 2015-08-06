@@ -173,4 +173,10 @@ public class Maths {
             throw new IllegalStateException(String.format(error, l));
         return (int) l;
     }
+
+    public static long agitate(long l) {
+        l ^= l >> 23;
+        l += Long.rotateRight(l, 18);
+        return l;
+    }
 }

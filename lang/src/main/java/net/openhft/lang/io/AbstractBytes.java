@@ -955,6 +955,20 @@ public abstract class AbstractBytes implements Bytes {
     }
 
     @Override
+    public long readIncompleteLong(long offset) {
+        long left = remaining();
+        if (left >= 8)
+            return readLong(offset);
+        if (left == 4)
+            return readInt(offset);
+        long l = 0;
+        for (int i = 0, remaining = (int) left; i < remaining; i++) {
+            l |= (long) readUnsignedByte(offset + i) << (i * 8);
+        }
+        return l;
+    }
+
+    @Override
     public long readStopBit() {
         long l;
         if ((l = readByte()) >= 0)

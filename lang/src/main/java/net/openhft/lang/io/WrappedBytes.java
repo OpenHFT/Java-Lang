@@ -149,6 +149,10 @@ public abstract class WrappedBytes<B extends Bytes> implements Bytes {
         return wrapped.readLong();
     }
 
+    public long readIncompleteLong(long offset) {
+        return wrapped.readIncompleteLong(offset);
+    }
+
     public void writeLong(long v) {
         wrapped.writeLong(v);
     }

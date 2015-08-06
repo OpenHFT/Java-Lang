@@ -29,4 +29,5 @@ public interface Bytes extends RandomDataInput, RandomDataOutput, RandomDataUpda
      * Needed if the buffer is created in one thread and used in another.
      */
     void clearThreadAssociation();
+
 }

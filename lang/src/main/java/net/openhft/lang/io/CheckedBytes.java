@@ -1056,6 +1056,12 @@ public class CheckedBytes implements Bytes {
         return this.bytes.readLong();
     }
 
+    @Override
+    public long readIncompleteLong(long offset) {
+        this.checkNotClosed();
+        return this.bytes.readIncompleteLong(offset);
+    }
+
     public long readLong(long offset) {
         this.checkNotClosed();
         return this.bytes.readLong(offset);
