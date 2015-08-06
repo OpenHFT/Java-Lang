@@ -18,6 +18,7 @@ package net.openhft.lang.io;
 
 import net.openhft.lang.Jvm;
 import net.openhft.lang.Maths;
+import net.openhft.lang.MutableLong;
 import net.openhft.lang.io.serialization.BytesMarshallableSerializer;
 import net.openhft.lang.io.serialization.BytesMarshallerFactory;
 import net.openhft.lang.io.serialization.JDKZObjectSerializer;
@@ -98,7 +99,8 @@ public abstract class AbstractBytes implements Bytes {
     private static final int INT_MAX_VALUE = Integer.MIN_VALUE + 2;
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final byte[] RADIX = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes();
-    private static final StringBuilderPool sbp = new StringBuilderPool();
+    private static final StringBuilderPool STRING_BUILDER_POOL = new StringBuilderPool();
+    private static final ThreadLocal<MutableLong> MUTABLE_LONG_POOL = MutableLong.getPoolInstance();
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
     private static boolean ID_LIMIT_WARNED = false;
     final AtomicInteger refCount;
@@ -226,25 +228,27 @@ public abstract class AbstractBytes implements Bytes {
         throw new BufferUnderflowException();
     }
 
-    public void readUTF0(@NotNull Appendable appendable, int utflen)
+    void readUTF0(long offset, @NotNull Appendable appendable, int utflen, MutableLong bytesRead)
             throws IOException {
         int count = 0;
 
         while (count < utflen) {
-            int c = readUnsignedByteOrThrow();
+            int c = readUnsignedByte(offset);
             if (c >= 128) {
-                position(position() - 1);
-                readUTF2(this, appendable, utflen, count);
+                readUTF2(offset, appendable, utflen, count, bytesRead);
                 break;
             }
+            offset++;
             count++;
             appendable.append((char) c);
         }
+        bytesRead.incrementBy(count);
     }
 
-    public static void readUTF2(Bytes bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
+    final void readUTF2(long offset, @NotNull Appendable appendable, int utflen, int count, MutableLong bytesRead) throws IOException {
         while (count < utflen) {
-            int c = bytes.readUnsignedByte();
+            int c = readUnsignedByte(offset++);
+            bytesRead.increment();
             switch (c >> 4) {
                 case 0:
                 case 1:
@@ -266,7 +270,8 @@ public abstract class AbstractBytes implements Bytes {
                     if (count > utflen)
                         throw new UTFDataFormatException(
                                 "malformed input: partial character at end");
-                    int char2 = bytes.readUnsignedByte();
+                    int char2 = readUnsignedByte(offset++);
+                    bytesRead.increment();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
                                 "malformed input around byte " + count + " was " + char2);
@@ -282,8 +287,10 @@ public abstract class AbstractBytes implements Bytes {
                     if (count > utflen)
                         throw new UTFDataFormatException(
                                 "malformed input: partial character at end");
-                    int char2 = bytes.readUnsignedByte();
-                    int char3 = bytes.readUnsignedByte();
+                    int char2 = readUnsignedByte(offset++);
+                    bytesRead.increment();
+                    int char3 = readUnsignedByte(offset++);
+                    bytesRead.increment();
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
                         throw new UTFDataFormatException(
@@ -679,46 +686,76 @@ public abstract class AbstractBytes implements Bytes {
         return null;
     }
 
-    // locking at it temporarily changes position.
-    // todo write a version without changing the position.
     @Nullable
     @Override
     public synchronized String readUTFΔ(long offset) throws IllegalStateException {
-        long position = position();
-        try {
-            position(offset);
-            return readUTFΔ();
-        } finally {
-            position(position);
+        return readUTFΔ(offset, MutableLong.getDummyInstance());
+    }
+
+    @Override
+    public String readUTFΔ(long offset, MutableLong bytesRead) throws IllegalStateException {
+        StringBuilder utfReader = acquireStringBuilder();
+        if (readUTFΔ(offset, utfReader, bytesRead)) {
+            return utfReader.length() == 0 ? "" : stringInterner().intern(utfReader);
         }
+        return null;
     }
 
     @NotNull
     private StringBuilder acquireStringBuilder() {
-        return sbp.acquireStringBuilder();
+        return STRING_BUILDER_POOL.acquireStringBuilder();
     }
 
     @Override
     public boolean readUTFΔ(@NotNull StringBuilder stringBuilder) {
+        return readUTFΔ(stringBuilder, MutableLong.getDummyInstance());
+    }
+
+    @Override
+    public boolean readUTFΔ(@NotNull StringBuilder stringBuilder, MutableLong bytesRead) {
         try {
             stringBuilder.setLength(0);
-            return appendUTF0(stringBuilder);
+            MutableLong appendedBytes = MUTABLE_LONG_POOL.get();
+            boolean result = appendUTF0(position(), stringBuilder, appendedBytes);
+            skip(appendedBytes.get());
+            bytesRead.incrementBy(appendedBytes);
+            return result;
+        } catch (IOException unexpected) {
+            throw new IllegalStateException(unexpected);
+        }
+    }
+
+    @Override
+    public boolean readUTFΔ(long offset, @NotNull StringBuilder stringBuilder) {
+        return readUTFΔ(offset, stringBuilder, MutableLong.getDummyInstance());
+    }
+
+    @Override
+    public boolean readUTFΔ(long offset, @NotNull StringBuilder stringBuilder, MutableLong bytesRead) {
+        try {
+            stringBuilder.setLength(0);
+            return appendUTF0(offset, stringBuilder, bytesRead);
         } catch (IOException unexpected) {
             throw new IllegalStateException(unexpected);
         }
     }
 
     @SuppressWarnings("MagicNumber")
-    private boolean appendUTF0(@NotNull Appendable appendable) throws IOException {
-        long len = readStopBit();
+    private boolean appendUTF0(long offset, @NotNull Appendable appendable, MutableLong bytesRead) throws IOException {
+        if (bytesRead.isDummy()) {
+            bytesRead = MUTABLE_LONG_POOL.get();
+        }
+
+        long len = readStopBit(offset, bytesRead);
         if (len == -1)
             return false;
         else if (len == 0)
             return true;
         if (len < -1 || len > remaining())
             throw new StreamCorruptedException("UTF length invalid " + len + " remaining: " + remaining());
+        offset += bytesRead.get();
         int utflen = (int) len;
-        readUTF0(appendable, utflen);
+        readUTF0(offset, appendable, utflen, bytesRead);
         return true;
     }
 
@@ -836,7 +873,9 @@ public abstract class AbstractBytes implements Bytes {
         try {
             int len = readUnsignedShort();
             StringBuilder utfReader = acquireStringBuilder();
-            readUTF0(utfReader, len);
+            MutableLong appendedBytes = MUTABLE_LONG_POOL.get();
+            readUTF0(position(), utfReader, len, appendedBytes);
+            skip(appendedBytes.get());
             return utfReader.length() == 0 ? "" : stringInterner().intern(utfReader);
         } catch (IOException unexpected) {
             throw new AssertionError(unexpected);
@@ -970,20 +1009,58 @@ public abstract class AbstractBytes implements Bytes {
 
     @Override
     public long readStopBit() {
-        long l;
-        if ((l = readByte()) >= 0)
-            return l;
-        return readStopBit0(l);
-    }
+        long l = readByte();
 
-    private long readStopBit0(long l) {
+        if (l >= 0) {
+            return l;
+        }
+
         l &= 0x7FL;
         long b;
         int count = 7;
-        while ((b = readByte()) < 0) {
+        while (true) {
+            b = readByte();
+            if (b >= 0) {
+                break;
+            }
             l |= (b & 0x7FL) << count;
             count += 7;
         }
+
+        return fixupReadStopBit(l, b, count);
+    }
+
+    @Override
+    public long readStopBit(long offset) {
+        return readStopBit(offset, MutableLong.getDummyInstance());
+    }
+
+    @Override
+    public long readStopBit(long offset, MutableLong bytesRead) {
+        long l = readByte(offset++);
+        bytesRead.increment();
+
+        if (l >= 0) {
+            return l;
+        }
+
+        l &= 0x7FL;
+        long b;
+        int count = 7;
+        while (true) {
+            b = readByte(offset++);
+            bytesRead.increment();
+            if (b >= 0) {
+                break;
+            }
+            l |= (b & 0x7FL) << count;
+            count += 7;
+        }
+
+        return fixupReadStopBit(l, b, count);
+    }
+
+    private long fixupReadStopBit(long l, long b, int count) {
         if (b != 0) {
             if (count > 56)
                 throw new IllegalStateException(

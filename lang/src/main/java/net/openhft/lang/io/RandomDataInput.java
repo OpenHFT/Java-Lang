@@ -19,6 +19,8 @@ package net.openhft.lang.io;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import net.openhft.lang.MutableLong;
+
 import java.io.ObjectInput;
 import java.io.StreamCorruptedException;
 import java.nio.ByteBuffer;
@@ -584,6 +586,10 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      */
     long readStopBit();
 
+    long readStopBit(long offset);
+
+    long readStopBit(long offset, MutableLong bytesRead);
+
     /**
      * Reads four input bytes and returns a <code>float</code> value. It does this by first constructing an
      * <code>int</code> value in exactly the manner of the <code>readInt</code> method, then converting this
@@ -753,6 +759,9 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     @Nullable
     String readUTFΔ(long offset) throws IllegalStateException;
 
+    @Nullable
+    String readUTFΔ(long offset, MutableLong bytesRead) throws IllegalStateException;
+
     /**
      * The same as readUTFΔ() except the chars are copied to a truncated StringBuilder.
      *
@@ -760,6 +769,12 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
      */
     boolean readUTFΔ(@NotNull StringBuilder stringBuilder);
+
+    boolean readUTFΔ(@NotNull StringBuilder stringBuilder, MutableLong bytesRead);
+
+    boolean readUTFΔ(long offset, @NotNull StringBuilder stringBuilder);
+
+    boolean readUTFΔ(long offset, @NotNull StringBuilder stringBuilder, MutableLong bytesRead);
 
     boolean read8bitText(@NotNull StringBuilder stringBuilder) throws StreamCorruptedException;
 
