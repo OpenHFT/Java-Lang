@@ -13,21 +13,11 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.openhft.lang.io;
 
-package net.openhft.lang.io.serialization.impl;
-
-/**
- * Created by peter.lawrey on 29/10/14.
- */
-public class StringBuilderPool {
-    private final ThreadLocal<StringBuilder> sbtl = new ThreadLocal<StringBuilder>();
-
-    public StringBuilder acquireStringBuilder() {
-        StringBuilder sb = sbtl.get();
-        if (sb == null) {
-            sbtl.set(sb = new StringBuilder(128));
-        }
-        sb.setLength(0);
-        return sb;
+final class ForwardingByteCountListenerPool extends ByteCountListenerPool<ForwardingByteCountListener> {
+    @Override
+    ForwardingByteCountListener createInstance() {
+        return new ForwardingByteCountListener();
     }
 }

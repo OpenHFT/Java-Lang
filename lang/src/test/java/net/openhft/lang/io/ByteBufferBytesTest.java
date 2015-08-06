@@ -224,7 +224,7 @@ public class ByteBufferBytesTest {
 
     @Test
     public void testWriteReadUTFΔ() {
-        String[] words = "Hello,World!,Bye£€!".split(",");
+        String[] words = { "Hello", "World!", "Bye£€!" };
         for (String word : words) {
             bytes.writeUTFΔ(word);
         }
@@ -250,7 +250,7 @@ public class ByteBufferBytesTest {
 
     @Test
     public void testWriteReadUTF() {
-        String[] words = "Hello,World!,Bye£€!".split(",");
+        String[] words = { "Hello", "World!", "Bye£€!" };
         for (String word : words) {
             bytes.writeUTF(word);
         }

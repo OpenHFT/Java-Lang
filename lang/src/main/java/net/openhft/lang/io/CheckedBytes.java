@@ -178,9 +178,16 @@ public class CheckedBytes implements Bytes {
         return this.bytes.readUTFΔ(offset);
     }
 
+    @Override
     public boolean readUTFΔ(@NotNull StringBuilder stringBuilder) {
         this.checkNotClosed();
         return this.bytes.readUTFΔ(stringBuilder);
+    }
+
+    @Override
+    public String readUTFΔ(long offset, ByteCountListener byteCountListener) throws IllegalStateException {
+        this.checkNotClosed();
+        return this.bytes.readUTFΔ(offset, byteCountListener);
     }
 
     @Override
@@ -255,31 +262,49 @@ public class CheckedBytes implements Bytes {
         return this.bytes.readCompactUnsignedInt();
     }
 
+    @Override
     public long readInt48() {
         this.checkNotClosed();
         return this.bytes.readInt48();
     }
 
+    @Override
     public long readInt48(long offset) {
         this.checkNotClosed();
         return this.bytes.readInt48(offset);
     }
 
+    @Override
     public long readCompactLong() {
         this.checkNotClosed();
         return this.bytes.readCompactLong();
     }
 
+    @Override
     public long readStopBit() {
         this.checkNotClosed();
         return this.bytes.readStopBit();
     }
 
+    @Override
+    public long readStopBit(long offset) {
+        this.checkNotClosed();
+        return this.bytes.readStopBit(offset);
+    }
+
+    @Override
+    public long readStopBit(long offset, ByteCountListener byteCountListener) {
+        this.checkNotClosed();
+        return this.bytes.readStopBit(offset, byteCountListener);
+    }
+
+    @Override
     public double readCompactDouble() {
         this.checkNotClosed();
         return this.bytes.readCompactDouble();
     }
 
+    @Override
     public void read(@NotNull ByteBuffer bb) {
         this.checkNotClosed();
         this.bytes.read(bb);

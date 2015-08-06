@@ -13,21 +13,21 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.openhft.lang.io;
 
-package net.openhft.lang.io.serialization.impl;
+public final class NullByteCountListener implements ByteCountListener {
+	private static final NullByteCountListener INSTANCE = new NullByteCountListener();
 
-/**
- * Created by peter.lawrey on 29/10/14.
- */
-public class StringBuilderPool {
-    private final ThreadLocal<StringBuilder> sbtl = new ThreadLocal<StringBuilder>();
+	private NullByteCountListener() {
+		// to be constructed only from inside of the class
+	}
 
-    public StringBuilder acquireStringBuilder() {
-        StringBuilder sb = sbtl.get();
-        if (sb == null) {
-            sbtl.set(sb = new StringBuilder(128));
-        }
-        sb.setLength(0);
-        return sb;
-    }
+	@Override
+	public void bytesProcessed(long byteCount) {
+		// do nothing
+	}
+
+	public static ByteCountListener getInstance() {
+		return INSTANCE;
+	}
 }

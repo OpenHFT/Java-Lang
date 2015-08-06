@@ -575,6 +575,10 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      */
     long readStopBit();
 
+    long readStopBit(long offset);
+
+    long readStopBit(long offset, ByteCountListener byteCountListener);
+
     /**
      * Reads four input bytes and returns a <code>float</code> value. It does this by first constructing an
      * <code>int</code> value in exactly the manner of the <code>readInt</code> method, then converting this
@@ -743,6 +747,9 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      */
     @Nullable
     String readUTFΔ(long offset) throws IllegalStateException;
+
+    @Nullable
+    String readUTFΔ(long offset, ByteCountListener byteCountListener) throws IllegalStateException;
 
     /**
      * The same as readUTFΔ() except the chars are copied to a truncated StringBuilder.

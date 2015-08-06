@@ -13,21 +13,19 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.openhft.lang.io;
 
-package net.openhft.lang.io.serialization.impl;
+abstract class ByteCountListenerPool<T extends SimpleByteCountListener> {
+    private final ThreadLocal<T> pool = new ThreadLocal<T>();
 
-/**
- * Created by peter.lawrey on 29/10/14.
- */
-public class StringBuilderPool {
-    private final ThreadLocal<StringBuilder> sbtl = new ThreadLocal<StringBuilder>();
-
-    public StringBuilder acquireStringBuilder() {
-        StringBuilder sb = sbtl.get();
-        if (sb == null) {
-            sbtl.set(sb = new StringBuilder(128));
+    T acquireByteCountListener() {
+        T instance = pool.get();
+        if (instance == null) {
+            pool.set(instance = createInstance());
         }
-        sb.setLength(0);
-        return sb;
+        instance.reset();
+        return instance;
     }
+
+    abstract T createInstance();
 }

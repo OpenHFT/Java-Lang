@@ -128,21 +128,27 @@ public class NativeBytes extends AbstractBytes {
     }
 
     // optimised to reduce overhead.
-    public void readUTF0(@NotNull Appendable appendable, int utflen)
-            throws IOException {
+    @Override
+    public int readUTF0(final long offset, @NotNull Appendable appendable, int utflen) throws IOException {
         int count = 0;
-        if (utflen > remaining())
+        int bytesRead = 0;
+        long address = startAddr + offset;
+        if (address > limitAddr)
             throw new BufferUnderflowException();
+
         while (count < utflen) {
-            int c = UNSAFE.getByte(positionAddr++) & 0xFF;
+            int c = UNSAFE.getByte(address++) & 0xFF;
+            bytesRead++;
             if (c >= 128) {
-                positionAddr--;
-                readUTF2(this, appendable, utflen, count);
+                bytesRead--;
+                bytesRead += readUTF2(this, offset + bytesRead, appendable, utflen, count);
                 break;
             }
             count++;
             appendable.append((char) c);
         }
+
+        return bytesRead;
     }
 
     @Override
