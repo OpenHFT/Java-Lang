@@ -2078,6 +2078,10 @@ public abstract class AbstractBytes implements Bytes {
     @SuppressWarnings("unchecked")
     @Override
     public <E> void writeEnum(@Nullable E e) {
+        if (e == null) {
+            write8bitText(null);
+            return;
+        }
         if (e instanceof Enum) {
             write8bitText(e.toString());
             return;
@@ -2099,8 +2103,9 @@ public abstract class AbstractBytes implements Bytes {
     private <E extends Enum<E>> E readEnum2(Class<E> eClass) {
         try {
             StringBuilder sb = acquireStringBuilder();
-            read8bitText(sb);
-            return EnumInterner.intern(eClass, sb);
+            if (read8bitText(sb))
+                return EnumInterner.intern(eClass, sb);
+            return null;
         } catch (StreamCorruptedException e) {
             throw new IllegalStateException(e);
         }

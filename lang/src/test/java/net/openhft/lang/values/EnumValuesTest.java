@@ -31,4 +31,17 @@ public class EnumValuesTest {
         ((BytesMarshallable) value2).readMarshallable(bytes);
         assertNull(value.getValue());
     }
+
+    @Test
+    public void testBytesMarshallable2() {
+        BuySellValues value = DataValueClasses.newInstance(BuySellValues.class);
+        DirectBytes bytes = DirectStore.allocate(8).bytes();
+        value.setValue(BuySell.Buy);
+        ((BytesMarshallable) value).writeMarshallable(bytes);
+
+        BuySellValues value2 = DataValueClasses.newInstance(BuySellValues.class);
+        ((BytesMarshallable) value2).readMarshallable(bytes);
+        assertNull(value.getValue());
+    }
 }
+

@@ -125,6 +125,8 @@ public class DataValueGenerator {
             return Character.toUpperCase(type.getName().charAt(0)) + type.getName().substring(1);
         if (CharSequence.class.isAssignableFrom(type))
             return "UTFΔ";
+        if (Enum.class.isAssignableFrom(type))
+            return "Enum";
         return "Object";
     }
 
@@ -483,20 +485,22 @@ public class DataValueGenerator {
 
         if(model.type() == Date.class){
             readMarshal.append("        _").append(name).append(" = new Date(in.readLong());\n");
-        }
-        else if (!model.isArray()) {
-            readMarshal.append("        _").append(name).append(" = in.read").append(bytesType(type)).append("(");
-            if ("Object".equals(bytesType(type)))
-                readMarshal.append(normalize(type)).append(".class");
-            readMarshal.append(");\n");
-
         } else {
-            readMarshal.append("        for (int i = 0; i < ").append(model.indexSize().value()).append("; i++){\n");
-            readMarshal.append("            _").append(name).append("[i] = in.read").append(bytesType(type)).append("(");
-            if ("Object".equals(bytesType(type)))
-                readMarshal.append(normalize(type)).append(".class");
-            readMarshal.append(");\n");
-            readMarshal.append("        }\n");
+            String str = bytesType(type);
+            if (!model.isArray()) {
+                readMarshal.append("        _").append(name).append(" = in.read").append(str).append("(");
+                if ("Object".equals(str) || "Enum".equals(str))
+                    readMarshal.append(normalize(type)).append(".class");
+                readMarshal.append(");\n");
+
+            } else {
+                readMarshal.append("        for (int i = 0; i < ").append(model.indexSize().value()).append("; i++){\n");
+                readMarshal.append("            _").append(name).append("[i] = in.read").append(str).append("(");
+                if ("Object".equals(str) || "Enum".equals(str))
+                    readMarshal.append(normalize(type)).append(".class");
+                readMarshal.append(");\n");
+                readMarshal.append("        }\n");
+            }
         }
     }
 
@@ -1102,7 +1106,7 @@ public class DataValueGenerator {
                 readMarshal.append("        ").append(setter.getName()).append("((Date)in.read").append(bytesType(type)).append("());\n");
         } else if (Enum.class.isAssignableFrom(model.type())) {
             if (getter != null && setter != null)
-                readMarshal.append("        ").append(setter.getName()).append("((" + type.getName() + ")in.read").append(bytesType(type)).append("());\n");
+                readMarshal.append("        ").append(setter.getName()).append("(in.readEnum(" + model.type() + "));\n");
         } else if (!model.isArray()) {
             if (getter != null && setter != null)
                 readMarshal.append("        ").append(setter.getName()).append("(in.read").append(bytesType(type)).append("());\n");
