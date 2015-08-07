@@ -228,11 +228,6 @@ public class DataValueModelImpl<T> implements DataValueModel<T> {
         }
     }
 
-    public boolean isMethodDefaultOrStatic(Method method)
-    {
-        return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC)) ==
-                Modifier.PUBLIC) && method.getDeclaringClass().isInterface();
-    }
     public static int heapSize(Class primitiveType) {
         if (!primitiveType.isPrimitive())
             throw new IllegalArgumentException();
@@ -343,6 +338,11 @@ public class DataValueModelImpl<T> implements DataValueModel<T> {
         if (name.length() > len && name.startsWith("tryLock") && Character.isUpperCase(name.charAt(len)))
             return Character.toLowerCase(name.charAt(len)) + name.substring(len + 1);
         return null;
+    }
+
+    public boolean isMethodDefaultOrStatic(Method method) {
+        return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC)) ==
+                Modifier.PUBLIC) && method.getDeclaringClass().isInterface();
     }
 
     private boolean isOrderedSetter(String name2) {
