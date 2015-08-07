@@ -446,22 +446,22 @@ public class DataValueGenerator {
         if (!model.isArray()) {
             if (getter != null && setter != null) {
                 writeMarshal.append("        {\n");
-                saveCharSequencePosition(writeMarshal, type, "out");
+//                saveCharSequencePosition(writeMarshal, type, "out");
                 writeMarshal.append("        out.write").append(bytesType(type)).append("(")
                         .append(getter.getName()).append("());\n");
-                zeroOutRemainingCharSequenceBytesAndUpdatePosition(
-                        writeMarshal, model, type, "out");
+//                zeroOutRemainingCharSequenceBytesAndUpdatePosition(
+//                        writeMarshal, model, type, "out");
                 writeMarshal.append("        }\n");
             }
             // otherwise skip.
         } else {
             writeMarshal.append("        for (int i = 0; i < ")
                     .append(model.indexSize().value()).append("; i++){\n");
-            saveCharSequencePosition(writeMarshal, type, "out");
+//            saveCharSequencePosition(writeMarshal, type, "out");
             writeMarshal.append("            out.write").append(bytesType(type)).append("(")
                     .append(getter.getName()).append("(i));\n");
-            zeroOutRemainingCharSequenceBytesAndUpdatePosition(
-                    writeMarshal, model, type, "out");
+//            zeroOutRemainingCharSequenceBytesAndUpdatePosition(
+//                    writeMarshal, model, type, "out");
             writeMarshal.append("        }\n");
         }
     }
