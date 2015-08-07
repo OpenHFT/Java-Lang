@@ -1106,7 +1106,7 @@ public class DataValueGenerator {
                 readMarshal.append("        ").append(setter.getName()).append("((Date)in.read").append(bytesType(type)).append("());\n");
         } else if (Enum.class.isAssignableFrom(model.type())) {
             if (getter != null && setter != null)
-                readMarshal.append("        ").append(setter.getName()).append("(in.readEnum(" + model.type() + "));\n");
+                readMarshal.append("        ").append(setter.getName()).append("(in.readEnum(" + model.type().getName() + ".class));\n");
         } else if (!model.isArray()) {
             if (getter != null && setter != null)
                 readMarshal.append("        ").append(setter.getName()).append("(in.read").append(bytesType(type)).append("());\n");
