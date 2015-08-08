@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNull;
 /**
  * Created by peter.lawrey on 06/08/2015.
  */
-@Ignore("JLANG-66")
 public class StringValueTest {
     @Test
     public void testSetNull() {
@@ -27,8 +26,12 @@ public class StringValueTest {
         DirectBytes bytes = DirectStore.allocate(8).bytes();
         ((BytesMarshallable) value).writeMarshallable(bytes);
 
+        bytes.clear();
+
         StringValue value2 = DataValueClasses.newInstance(StringValue.class);
+        // to ensure, in assert below, that readMarshallable indeed reads and sets null
+        value2.setValue("foo");
         ((BytesMarshallable) value2).readMarshallable(bytes);
-        assertNull(value.getValue());
+        assertNull(value2.getValue());
     }
 }
