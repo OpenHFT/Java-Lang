@@ -72,12 +72,12 @@ public class DirectStore implements BytesStore, AutoCloseable {
 
     @NotNull
     public static DirectStore allocate(long size) {
-        return new DirectStore(null, size);
+        return new DirectStore(new VanillaBytesMarshallerFactory(), size);
     }
 
     @NotNull
     public static DirectStore allocateLazy(long size) {
-        return new DirectStore((BytesMarshallerFactory) null, size, false);
+        return new DirectStore(new VanillaBytesMarshallerFactory(), size, false);
     }
 
     /**

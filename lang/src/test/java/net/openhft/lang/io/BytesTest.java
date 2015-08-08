@@ -1,6 +1,5 @@
 package net.openhft.lang.io;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotSame;
@@ -11,7 +10,6 @@ import static org.junit.Assert.assertSame;
  */
 public class BytesTest {
     @Test
-    @Ignore("JLANG-65")
     public void testReadEnum() {
         Bytes b = DirectStore.allocate(128).bytes();
         b.writeEnum("Hello");
