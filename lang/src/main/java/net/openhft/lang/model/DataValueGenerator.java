@@ -552,12 +552,16 @@ public class DataValueGenerator {
         }
     }
 
+    private static String nullAwareToString(String var) {
+        return "(" + var + " != null ? " + var + ".toString() : null)";
+    }
+
     private static void methodHeapSet(StringBuilder getterSetters, Method setter, String name, Class type, FieldModel model) {
         Class<?> setterType = setter.getParameterTypes()[setter.getParameterTypes().length - 1];
         if (!model.isArray()) {
             getterSetters.append("    public void ").append(setter.getName()).append('(').append(normalize(setterType)).append(" $) {\n");
             if (type == String.class && setterType != String.class)
-                getterSetters.append("        _").append(name).append(" = $.toString();\n");
+                getterSetters.append("        _").append(name).append(" = " + nullAwareToString("$") + ";\n");
             else
                 getterSetters.append("        _").append(name).append(" = $;\n");
 
@@ -565,7 +569,7 @@ public class DataValueGenerator {
             getterSetters.append("    public void ").append(setter.getName()).append("(int i, ").append(normalize(setterType)).append(" $) {\n");
             getterSetters.append(boundsCheck(model.indexSize().value()));
             if (type == String.class && setterType != String.class)
-                getterSetters.append("        _").append(name).append("[i] = $.toString();\n");
+                getterSetters.append("        _").append(name).append("[i] = " + nullAwareToString("$") + ";\n");
             else
                 getterSetters.append("        _").append(name).append("[i] = $;\n");
         }
@@ -1149,14 +1153,14 @@ public class DataValueGenerator {
         if (!model.isArray()) {
             getterSetters.append("    public void ").append(setter.getName()).append('(').append(normalize(setterType)).append(" $) {\n");
             if (type == String.class && setterType != String.class)
-                getterSetters.append("        _").append(name).append(" = $.toString();\n");
+                getterSetters.append("        _").append(name).append(" = " + nullAwareToString("$") + ";\n");
             else
                 getterSetters.append("        _").append(name).append(".copyFrom($);\n");
 
         } else {
             getterSetters.append("    public void ").append(setter.getName()).append("(int i, ").append(normalize(setterType)).append(" $) {\n");
             if (type == String.class && setterType != String.class)
-                getterSetters.append("        _").append(name).append("[i] = $.toString();\n");
+                getterSetters.append("        _").append(name).append("[i] = " + nullAwareToString("$") + ";\n");
             else
                 getterSetters.append("        _").append(name).append("[i].copyFrom($);\n");
         }
