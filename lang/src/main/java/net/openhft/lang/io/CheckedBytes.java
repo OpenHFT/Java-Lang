@@ -21,6 +21,7 @@
 
 package net.openhft.lang.io;
 
+import net.openhft.lang.MutableLong;
 import net.openhft.lang.io.serialization.ObjectSerializer;
 import net.openhft.lang.model.Byteable;
 import org.jetbrains.annotations.NotNull;
@@ -175,12 +176,37 @@ public class CheckedBytes implements Bytes {
 
     @Nullable
     public String readUTFΔ(long offset) throws IllegalStateException {
+        this.checkNotClosed();
         return this.bytes.readUTFΔ(offset);
+    }
+
+    @Override
+    public String readUTFΔ(long offset, MutableLong bytesRead) throws IllegalStateException {
+        this.checkNotClosed();
+        return this.bytes.readUTFΔ(offset, bytesRead);
     }
 
     public boolean readUTFΔ(@NotNull StringBuilder stringBuilder) {
         this.checkNotClosed();
         return this.bytes.readUTFΔ(stringBuilder);
+    }
+
+    @Override
+    public boolean readUTFΔ(@NotNull StringBuilder stringBuilder, MutableLong bytesRead) {
+        this.checkNotClosed();
+        return this.bytes.readUTFΔ(stringBuilder, bytesRead);
+    }
+
+    @Override
+    public boolean readUTFΔ(long offset, StringBuilder stringBuilder) {
+        this.checkNotClosed();
+        return this.bytes.readUTFΔ(offset, stringBuilder);
+    }
+
+    @Override
+    public boolean readUTFΔ(long offset, StringBuilder stringBuilder, MutableLong bytesRead) {
+        this.checkNotClosed();
+        return this.bytes.readUTFΔ(offset, stringBuilder, bytesRead);
     }
 
     @Override
@@ -273,6 +299,18 @@ public class CheckedBytes implements Bytes {
     public long readStopBit() {
         this.checkNotClosed();
         return this.bytes.readStopBit();
+    }
+
+    @Override
+    public long readStopBit(long offset) {
+        this.checkNotClosed();
+        return this.bytes.readStopBit(offset);
+    }
+
+    @Override
+    public long readStopBit(long offset, MutableLong bytesRead) {
+        this.checkNotClosed();
+        return this.bytes.readStopBit(offset, bytesRead);
     }
 
     public double readCompactDouble() {

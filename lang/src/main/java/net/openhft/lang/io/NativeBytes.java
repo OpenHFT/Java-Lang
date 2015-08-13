@@ -16,6 +16,7 @@
 
 package net.openhft.lang.io;
 
+import net.openhft.lang.MutableLong;
 import net.openhft.lang.io.serialization.BytesMarshallerFactory;
 import net.openhft.lang.io.serialization.ObjectSerializer;
 import org.jetbrains.annotations.NotNull;
@@ -128,21 +129,24 @@ public class NativeBytes extends AbstractBytes {
     }
 
     // optimised to reduce overhead.
-    public void readUTF0(@NotNull Appendable appendable, int utflen)
+    @Override
+    void readUTF0(long offset, @NotNull Appendable appendable, int utflen, MutableLong bytesRead)
             throws IOException {
         int count = 0;
         if (utflen > remaining())
             throw new BufferUnderflowException();
+        long absoluteOffset = startAddr + offset;
         while (count < utflen) {
-            int c = UNSAFE.getByte(positionAddr++) & 0xFF;
+            int c = UNSAFE.getByte(absoluteOffset) & 0xFF;
             if (c >= 128) {
-                positionAddr--;
-                readUTF2(this, appendable, utflen, count);
+                readUTF2(offset + count, appendable, utflen, count, bytesRead);
                 break;
             }
+            absoluteOffset++;
             count++;
             appendable.append((char) c);
         }
+        bytesRead.incrementBy(count);
     }
 
     @Override

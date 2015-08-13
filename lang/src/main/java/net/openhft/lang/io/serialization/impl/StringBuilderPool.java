@@ -19,8 +19,8 @@ package net.openhft.lang.io.serialization.impl;
 /**
  * Created by peter.lawrey on 29/10/14.
  */
-public class StringBuilderPool {
-    final ThreadLocal<StringBuilder> sbtl = new ThreadLocal<StringBuilder>();
+public final class StringBuilderPool {
+    private final ThreadLocal<StringBuilder> sbtl = new ThreadLocal<StringBuilder>();
 
     public StringBuilder acquireStringBuilder() {
         StringBuilder sb = sbtl.get();
