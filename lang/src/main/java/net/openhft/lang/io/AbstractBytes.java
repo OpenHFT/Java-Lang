@@ -340,36 +340,24 @@ public abstract class AbstractBytes implements Bytes {
         return utflen;
     }
 
-    static final Field VALUE;
-
-    static {
-        try {
-            VALUE = String.class.getDeclaredField("value");
-            VALUE.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new AssertionError(e);
-        }
-    }
+    private static final FastStringOperations STRING_OPS = createFastStringOperations();
 
     public static long findUTFLength(@NotNull String str) {
-        char[] chars;
+        return STRING_OPS.getUtf8EncodedStringLength(str);
+    }
+
+    private static FastStringOperations createFastStringOperations() {
         try {
-            chars = (char[]) VALUE.get(str);
-        } catch (IllegalAccessException e) {
+            return new FastStringOperations16();
+        } catch (Exception e) {
+            // do nothing
+        }
+
+        try {
+            return new FastStringOperations17();
+        } catch (Exception e) {
             throw new AssertionError(e);
         }
-        long utflen = chars.length;
-        for (char c : chars) {
-            if ((c > 0x007F)) {
-                if (c > 0x07FF) {
-                    utflen += 2;
-
-                } else {
-                    utflen += 1;
-                }
-            }
-        }
-        return utflen;
     }
 
     public static void writeUTF0(Bytes bytes, @NotNull CharSequence str, long strlen) {
@@ -3016,5 +3004,79 @@ public abstract class AbstractBytes implements Bytes {
 
     static class LoggerHolder {
         public static final Logger LOGGER = Logger.getLogger(AbstractBytes.class.getName());
+    }
+
+    abstract static class FastStringOperations {
+        abstract long getUtf8EncodedStringLength(@NotNull String string);
+
+        final int getUtf8CharSize(char c) {
+            if ((c > 0x007F)) {
+                if (c > 0x07FF) {
+                    return 3;
+                } else {
+                    return 2;
+                }
+            }
+            return 1;
+        }
+    }
+
+    private static class FastStringOperations17 extends FastStringOperations {
+        final Field valueField;
+
+        private FastStringOperations17() throws SecurityException, NoSuchFieldException {
+            valueField = String.class.getDeclaredField("value");
+            valueField.setAccessible(true);
+        }
+
+        char[] extractChars(String string) {
+            try {
+                return (char[]) valueField.get(string);
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        @Override
+        long getUtf8EncodedStringLength(String string) {
+            long utflen = 0;
+            for (char c : extractChars(string)) {
+                utflen += getUtf8CharSize(c);
+            }
+            return utflen;
+        }
+
+    }
+
+    private static final class FastStringOperations16 extends FastStringOperations17 {
+        private final Field offsetField, countField;
+
+        private FastStringOperations16() throws SecurityException, NoSuchFieldException {
+            super();
+            offsetField = String.class.getDeclaredField("offset");
+            offsetField.setAccessible(true);
+            countField = String.class.getDeclaredField("count");
+            countField.setAccessible(true);
+        }
+
+        @Override
+        long getUtf8EncodedStringLength(String string) {
+            final char[] chars = extractChars(string);
+            final int startIndex, endIndex;
+
+            try {
+                startIndex = offsetField.getInt(string);
+                endIndex = startIndex + countField.getInt(string);
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+
+            long utflen = 0;
+            for (int i = startIndex; i < endIndex; ++i) {
+                utflen += getUtf8CharSize(chars[i]);
+            }
+            return utflen;
+        }
+        
     }
 }
