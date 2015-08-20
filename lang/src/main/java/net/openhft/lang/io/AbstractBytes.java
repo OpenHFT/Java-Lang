@@ -261,7 +261,7 @@ public abstract class AbstractBytes implements Bytes {
         }
     }
 
-    static long findUTFLength(@NotNull CharSequence str) {
+    public static long findUTFLength(@NotNull CharSequence str) {
         if (str instanceof String)
             return findUTFLength((String) str);
         int strlen = str.length();
