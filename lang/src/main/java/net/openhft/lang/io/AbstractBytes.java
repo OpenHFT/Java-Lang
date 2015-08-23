@@ -775,7 +775,8 @@ public abstract class AbstractBytes implements Bytes {
         }
     }
 
-    private void readUTF2(@NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
+    // used by Chronicle Map 3.x
+    public void readUTF2(@NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
         while (true) {
             int c = readUnsignedByteOrThrow();
             switch (c >> 4) {
