@@ -72,17 +72,6 @@ public class NativeBytes extends AbstractBytes {
         positionChecks(positionAddr);
     }
 
-    public void setStartPositionAddress(long startAddr) {
-        if ((startAddr & ~0x3fff) == 0)
-            throw new AssertionError("Invalid address " + Long.toHexString(startAddr));
-        this.positionAddr =
-                this.startAddr = startAddr;
-    }
-
-    public static NativeBytes wrap(long address, long capacity) {
-        return new NativeBytes(address, address + capacity);
-    }
-
     /**
      * @deprecated Use {@link #NativeBytes(ObjectSerializer, long, long, AtomicInteger)} instead
      */
@@ -117,6 +106,10 @@ public class NativeBytes extends AbstractBytes {
         positionChecks(positionAddr);
     }
 
+    public static NativeBytes wrap(long address, long capacity) {
+        return new NativeBytes(address, address + capacity);
+    }
+
     public static long longHash(byte[] bytes, int off, int len) {
         long hash = 0;
         int pos = 0;
@@ -127,12 +120,50 @@ public class NativeBytes extends AbstractBytes {
         return hash;
     }
 
+    public void setStartPositionAddress(long startAddr) {
+        if ((startAddr & ~0x3fff) == 0)
+            throw new AssertionError("Invalid address " + Long.toHexString(startAddr));
+        this.positionAddr =
+                this.startAddr = startAddr;
+    }
+
     // optimised to reduce overhead.
     public void readUTF0(@NotNull Appendable appendable, int utflen)
             throws IOException {
-        int count = 0;
         if (utflen > remaining())
             throw new BufferUnderflowException();
+        if (appendable instanceof StringBuilder)
+            readUTF1((StringBuilder) appendable, utflen);
+        else
+            readUTF1(appendable, utflen);
+    }
+
+    private void readUTF1(@NotNull StringBuilder sb, int utflen)
+            throws IOException {
+        int count = 0;
+        sb.ensureCapacity(utflen);
+        char[] chars = StringBuilderUtils.extractChars(sb);
+        ascii:
+        try {
+            while (count < utflen) {
+                int c = UNSAFE.getByte(positionAddr++) & 0xFF;
+                if (c >= 128) {
+                    break ascii;
+                }
+                chars[count++] = (char) c;
+            }
+            return;
+        } finally {
+            StringBuilderUtils.setCount(sb, count);
+        }
+
+        positionAddr--;
+        readUTF2(this, sb, utflen, count);
+    }
+
+    private void readUTF1(@NotNull Appendable appendable, int utflen)
+            throws IOException {
+        int count = 0;
         while (count < utflen) {
             int c = UNSAFE.getByte(positionAddr++) & 0xFF;
             if (c >= 128) {
