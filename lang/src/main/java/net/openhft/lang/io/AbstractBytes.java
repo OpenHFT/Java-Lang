@@ -200,7 +200,7 @@ public abstract class AbstractBytes implements Bytes {
         throw new BufferUnderflowException();
     }
 
-    static void readUTF2(Bytes bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
+    public static void readUTF2(Bytes bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
