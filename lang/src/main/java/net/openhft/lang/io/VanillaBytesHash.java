@@ -1,51 +1,69 @@
 package net.openhft.lang.io;
 
-import net.openhft.lang.Maths;
-
 import java.nio.ByteOrder;
 
 public enum VanillaBytesHash implements BytesHasher {
     INSTANCE;
 
-    private static final int TOP_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
+    public static final int K0 = 0x6d0f27bd;
+    public static final int K1 = 0xc1f3bfc9;
+    public static final int K2 = 0x6b192397;
+    public static final int K3 = 0x6b915657;
+    public static final int M0 = 0x5bc80bad;
+    public static final int M1 = 0xea7585d7;
+    public static final int M2 = 0x7a646e19;
+    public static final int M3 = 0x855dd4db;
+    private static final int HI_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
 
-    static final int K0 = 0xc5b03135;
-    static final int K1 = 0x1d562d7b;
-    static final int M0 = 0x49325e2f;
-    static final int M1 = 0x32752743;
-    static final int M2 = 0xf4bb2e2f;
-    static final int M3 = 0x4a6417c9;
+    public static long agitate(long l) {
+        l += l >>> 22;
+        l ^= Long.rotateRight(l, 17);
+        return l;
+    }
 
     @Override
     public long hash(Bytes bytes, long offset, long limit) {
-        int remaining = Maths.toInt(limit - offset, "Hash of a very large data set");
+        long start = offset;
+        int remaining = (int) (limit - offset);
         // use two hashes so that when they are combined the 64-bit hash is more random.
-        long h0 = remaining;
-        long h1 = 0;
+        long h0 = (long) remaining * K0;
+        long h1 = 0, h2 = 0, h3 = 0;
         int i;
         // optimise chunks of 32 bytes but this is the same as the next loop.
         for (i = 0; i < remaining - 31; i += 32) {
-            h0 *= K0;
-            h1 *= K1;
-            long addrI = offset + i;
+            if (i > 0) {
+                h0 *= K0;
+                h1 *= K1;
+                h2 *= K2;
+                h3 *= K3;
+            }
+            long addrI = start + i;
             long l0 = bytes.readLong(addrI);
-            int l0a = bytes.readInt(addrI + TOP_BYTES);
+            int l0a = bytes.readInt(addrI + HI_BYTES);
             long l1 = bytes.readLong(addrI + 8);
-            int l1a = bytes.readInt(addrI + 8 + TOP_BYTES);
+            int l1a = bytes.readInt(addrI + 8 + HI_BYTES);
             long l2 = bytes.readLong(addrI + 16);
-            int l2a = bytes.readInt(addrI + 16 + TOP_BYTES);
+            int l2a = bytes.readInt(addrI + 16 + HI_BYTES);
             long l3 = bytes.readLong(addrI + 24);
-            int l3a = bytes.readInt(addrI + 24 + TOP_BYTES);
+            int l3a = bytes.readInt(addrI + 24 + HI_BYTES);
 
-            h0 += (l0 + l1a) * M0 + (l2 + l3a) * M2;
-            h1 += (l1 + l0a) * M1 + (l3 + l2a) * M3;
+            h0 += (l0 + l1a - l2a) * M0;
+            h1 += (l1 + l2a - l3a) * M1;
+            h2 += (l2 + l3a - l0a) * M2;
+            h3 += (l3 + l0a - l1a) * M3;
         }
+
         // perform a hash of the end.
         int left = remaining - i;
         if (left > 0) {
-            h0 *= K0;
-            h1 *= K1;
-            long addrI = offset + i;
+            if (i > 0) {
+                h0 *= K0;
+                h1 *= K1;
+                h2 *= K2;
+                h3 *= K3;
+            }
+
+            long addrI = start + i;
             long l0 = bytes.readIncompleteLong(addrI);
             int l0a = (int) (l0 >> 32);
             long l1 = bytes.readIncompleteLong(addrI + 8);
@@ -55,10 +73,13 @@ public enum VanillaBytesHash implements BytesHasher {
             long l3 = bytes.readIncompleteLong(addrI + 24);
             int l3a = (int) (l3 >> 32);
 
-            h0 += (l0 + l1a) * M0 + (l2 + l3a) * M2;
-            h1 += (l1 + l0a) * M1 + (l3 + l2a) * M3;
+            h0 += (l0 + l1a - l2a) * M0;
+            h1 += (l1 + l2a - l3a) * M1;
+            h2 += (l2 + l3a - l0a) * M2;
+            h3 += (l3 + l0a - l1a) * M3;
         }
-        return Maths.agitate(h0) ^ Maths.agitate(h1);
+        return agitate(h0) ^ agitate(h1)
+                ^ agitate(h2) ^ agitate(h3);
     }
 
     @Override
