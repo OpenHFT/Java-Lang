@@ -21,7 +21,6 @@ import net.openhft.lang.io.serialization.BytesMarshaller;
 import net.openhft.lang.model.constraints.NotNull;
 import net.openhft.lang.model.constraints.Nullable;
 
-import java.io.ObjectStreamException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -67,7 +66,7 @@ public class GenericEnumMarshaller<E> implements BytesMarshaller<E> {
         };
     }
 
-    private Object readResolve() throws ObjectStreamException {
+    private Object readResolve() {
         return new GenericEnumMarshaller(classMarshaled, capacity);
     }
 

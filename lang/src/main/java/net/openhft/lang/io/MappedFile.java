@@ -52,10 +52,6 @@ public class MappedFile {
         fileChannel = new RandomAccessFile(filename, "rw").getChannel();
     }
 
-    public String name() {
-        return filename;
-    }
-
     public static MappedByteBuffer getMap(@NotNull FileChannel fileChannel, long start, int size) throws IOException {
         for (int i = 1; ; i++) {
             try {
@@ -82,6 +78,10 @@ public class MappedFile {
         }
     }
 
+    public String name() {
+        return filename;
+    }
+
     public MappedMemory acquire(long index) throws IOException {
         MappedMemory map0 = this.map0, map1 = this.map1;
         if (map0 != null && map0.index() == index) {
@@ -102,7 +102,7 @@ public class MappedFile {
      * @return the mapping at this {@code index}
      * @throws IndexOutOfBoundsException if the index is out of range
      */
-    public int getRefCount(long index) throws IOException {
+    public int getRefCount(long index) {
         try {
             for (MappedMemory m : maps) {
                 if (m.index() == index)

@@ -40,7 +40,7 @@ public interface IntValue {
 
     boolean tryLockNanosValue(long nanos);
 
-    void busyLockValue() throws InterruptedException, IllegalStateException;
+    void busyLockValue() throws IllegalStateException, InterruptedException;
 
     void unlockValue() throws IllegalMonitorStateException;
 }
