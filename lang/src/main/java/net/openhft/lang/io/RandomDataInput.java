@@ -919,4 +919,6 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     boolean startsWith(RandomDataInput input);
     
     boolean compare(long offset, RandomDataInput input, long inputOffset, long len);
+
+    <E> E readEnum(long offset, int maxSize, Class<E> eClass);
 }

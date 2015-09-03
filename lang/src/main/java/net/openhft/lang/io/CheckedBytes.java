@@ -588,6 +588,18 @@ public class CheckedBytes implements Bytes {
         return this.bytes.readEnum(eClass);
     }
 
+    @Override
+    public <E> E readEnum(long offset, int maxSize, Class<E> eClass) {
+        this.checkNotClosed();
+        return this.bytes.readEnum(offset, maxSize, eClass);
+    }
+
+    @Override
+    public void writeEnum(long offset, int maxSize, Object object) {
+        this.checkNotClosed();
+        this.bytes.writeEnum(offset, maxSize, object);
+    }
+
     public <E extends Enum<E>> E parseEnum(@NotNull Class<E> eClass, @NotNull StopCharTester tester) {
         this.checkNotClosed();
         return this.bytes.parseEnum(eClass, tester);

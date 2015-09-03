@@ -945,4 +945,6 @@ public interface RandomDataOutput extends ObjectOutput, RandomAccess, BytesCommo
      */
     @Override
     void close();
+
+    void writeEnum(long offset, int len, Object object);
 }

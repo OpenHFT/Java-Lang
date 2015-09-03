@@ -2104,14 +2104,31 @@ public abstract class AbstractBytes implements Bytes {
             write8bitText(null);
             return;
         }
+        if (e instanceof CharSequence) {
+            write8bitText((CharSequence) e);
+            return;
+        }
         if (e instanceof Enum) {
             write8bitText(e.toString());
             return;
         }
-        Class aClass = e == null || e instanceof CharSequence
-                ? String.class
-                : (Class) e.getClass();
+
+        Class aClass = (Class) e.getClass();
         writeInstance(aClass, e);
+    }
+
+    @Override
+    public void writeEnum(long offset, int len, Object e) {
+        long pos = position();
+        long lim = limit();
+        try {
+            position(offset);
+            limit(offset + len);
+            writeEnum(e);
+        } finally {
+            limit(lim);
+            position(pos);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -2119,7 +2136,27 @@ public abstract class AbstractBytes implements Bytes {
     public <E> E readEnum(@NotNull Class<E> eClass) {
         if (Enum.class.isAssignableFrom(eClass))
             return (E) readEnum2((Class<Enum>) (Class) eClass);
+        if (String.class.isAssignableFrom(eClass))
+            return (E) readUTFΔ();
         return readInstance(eClass, null);
+    }
+
+    @Override
+    public <E> E readEnum(long offset, int maxSize, Class<E> eClass) {
+        long pos = position();
+        long lim = limit();
+        try {
+            position(offset);
+            limit(offset + maxSize);
+            if (Enum.class.isAssignableFrom(eClass))
+                return (E) readEnum2((Class<Enum>) (Class) eClass);
+            if (String.class.isAssignableFrom(eClass))
+                return (E) readUTFΔ();
+            return readInstance(eClass, null);
+        } finally {
+            limit(lim);
+            position(pos);
+        }
     }
 
     private <E extends Enum<E>> E readEnum2(Class<E> eClass) {
