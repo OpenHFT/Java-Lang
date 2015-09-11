@@ -15,14 +15,14 @@
  */
 package net.openhft.lang.io;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-
 import net.openhft.lang.io.serialization.BytesMarshallableSerializer;
 import net.openhft.lang.io.serialization.JDKZObjectSerializer;
 import net.openhft.lang.io.serialization.ObjectSerializer;
 import net.openhft.lang.io.serialization.impl.VanillaBytesMarshallerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 public final class ResizeableMappedStore extends AbstractMappedStore {
     public ResizeableMappedStore(File file, FileChannel.MapMode mode, long size)
@@ -35,7 +35,6 @@ public final class ResizeableMappedStore extends AbstractMappedStore {
                                  ObjectSerializer objectSerializer) throws IOException {
         super(new MmapInfoHolder(), file, mode, 0L, size, objectSerializer);
     }
-
 
     /**
      * Resizes the underlying file and re-maps it. Warning! After this call

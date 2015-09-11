@@ -41,7 +41,6 @@ public enum StringBuilderUtils {
         }
     }
 
-
     public static boolean endsWith(@NotNull final CharSequence source,
                                    @NotNull final String endsWith) {
         for (int i = 1; i <= endsWith.length(); i++) {

@@ -437,7 +437,6 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     @Override
     long readLong();
 
-
     /**
      * Same as readLong except the remaining() can be less than 8.
      *
