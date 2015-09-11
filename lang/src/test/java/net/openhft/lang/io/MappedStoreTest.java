@@ -31,6 +31,14 @@ public class MappedStoreTest {
     //private static final long MS_SIZE = 3L << 30;
     private static final long MS_SIZE = 1024;
 
+    static File getStoreFile(String fileName) {
+        File file = new File(System.getProperty("java.io.tmpdir"), fileName);
+        file.delete();
+        file.deleteOnExit();
+
+        return file;
+    }
+
     @After
     public void tearDown() {
         System.gc();
@@ -84,6 +92,26 @@ public class MappedStoreTest {
         }
     }
 
+    /*
+    @Test
+    public void testSliceSize()   {
+        File file = getStoreFile("mapped-store");
+
+        MappedStore ms = new MappedStore(file, FileChannel.MapMode.READ_WRITE, MS_SIZE);
+        DirectBytes slice = ms.bytes();
+
+        for(long i=0;i<MS_SIZE+1;i += 8) {
+            slice.writeLong(i);
+        }
+
+        slice.release();
+        ms.free();
+    }
+    */
+    // *************************************************************************
+    // Helpers
+    // *************************************************************************
+
     @Test
     public void testCreateMappedStoreWithOffset() throws IOException {
         final int _64k = 64 * 1024, _128k = 128 * 1024;
@@ -102,27 +130,6 @@ public class MappedStoreTest {
         ms.close();
     }
 
-    /*
-    @Test
-    public void testSliceSize()   {
-        File file = getStoreFile("mapped-store");
-
-        MappedStore ms = new MappedStore(file, FileChannel.MapMode.READ_WRITE, MS_SIZE);
-        DirectBytes slice = ms.bytes();
-
-        for(long i=0;i<MS_SIZE+1;i += 8) {
-            slice.writeLong(i);
-        }
-
-        slice.release();
-        ms.free();
-    }
-    */
-
-    // *************************************************************************
-    // Helpers
-    // *************************************************************************
-
     private void fill(File file, int expectedSize) throws IOException {
         MappedStore ms = new MappedStore(file, FileChannel.MapMode.READ_WRITE, expectedSize);
         Bytes bytes = ms.bytes();
@@ -131,14 +138,6 @@ public class MappedStoreTest {
         }
         bytes.release();
         ms.close();
-    }
-
-    static File getStoreFile(String fileName) {
-        File file = new File(System.getProperty("java.io.tmpdir"),fileName);
-        file.delete();
-        file.deleteOnExit();
-
-        return file;
     }
 }
 

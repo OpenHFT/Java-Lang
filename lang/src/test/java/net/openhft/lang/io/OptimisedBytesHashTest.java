@@ -62,7 +62,6 @@ public class OptimisedBytesHashTest {
             assertEquals(applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
     }
 */
-
     @Test
     @Ignore("Long running, avg score = 6879")
     public void testRandomness() {
@@ -172,7 +171,6 @@ public class OptimisedBytesHashTest {
                     sb.append(b);
                     assertEquals(hashs[i], Maths.longHash(sb));
                 }*/
-
             }
             long score = 0;
             for (int i = 0; i < hashs.length - 1; i++)

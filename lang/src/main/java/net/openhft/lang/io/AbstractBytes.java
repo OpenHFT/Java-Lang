@@ -811,7 +811,6 @@ public abstract class AbstractBytes implements Bytes {
 
                 case 14: {
                 /* 1110 xxxx 10xx xxxx 10xx xxxx */
-
                     int char2 = readUnsignedByte();
                     int char3 = readUnsignedByte();
 

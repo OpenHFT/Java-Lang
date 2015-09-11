@@ -195,7 +195,6 @@ public interface RandomDataOutput extends ObjectOutput, RandomAccess, BytesCommo
      * @param offset to write boolean
      * @param v      the boolean to be written.
      */
-
     void writeBoolean(long offset, boolean v);
 
     /**
