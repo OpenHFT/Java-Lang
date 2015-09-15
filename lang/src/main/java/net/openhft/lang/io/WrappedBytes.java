@@ -19,10 +19,12 @@ package net.openhft.lang.io;
 import net.openhft.lang.io.serialization.ObjectSerializer;
 import net.openhft.lang.model.Byteable;
 import net.openhft.lang.model.constraints.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StreamCorruptedException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -1025,5 +1027,25 @@ public abstract class WrappedBytes<B extends Bytes> implements Bytes {
     @Override
     public void write(long offset, Bytes bytes) {
         wrapped.write(offset, bytes);
+    }
+
+    @Override
+    public boolean read8bitText(@org.jetbrains.annotations.NotNull StringBuilder stringBuilder) throws StreamCorruptedException {
+        return wrapped.read8bitText(stringBuilder);
+    }
+
+    @Override
+    public <E> E readEnum(long offset, int maxSize, Class<E> eClass) {
+        return wrapped.readEnum(offset, maxSize, eClass);
+    }
+
+    @Override
+    public void write8bitText(@Nullable CharSequence s) {
+        wrapped.write8bitText(s);
+    }
+
+    @Override
+    public void writeEnum(long offset, int len, Object object) {
+        wrapped.writeEnum(offset, len, object);
     }
 }
