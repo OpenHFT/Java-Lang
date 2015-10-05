@@ -106,6 +106,10 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
 
     protected final void unmapAndSyncToDisk() throws IOException {
         unmap0(mmapInfoHolder.getAddress(), mmapInfoHolder.getSize());
+        syncToDisk();
+    }
+
+    public final void syncToDisk() throws IOException {
         raf.getChannel().force(true);
     }
 
