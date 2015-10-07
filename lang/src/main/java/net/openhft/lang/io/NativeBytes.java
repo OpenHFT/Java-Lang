@@ -261,7 +261,7 @@ public class NativeBytes extends AbstractBytes {
             long l = UNSAFE.getLong(startAddr + start);
             if (l != 0)
                 UNSAFE.putLong(startAddr + start, 0L);
-            start++;
+            start += 8;
         }
         // check unaligned tail
         while (start < end) {

@@ -171,7 +171,7 @@ public class MappedNativeBytes extends AbstractBytes {
             long l = unsafe.getLong(this.start + start);
             if (l != 0)
                 unsafe.putLong(this.start + start, 0L);
-            start++;
+            start += 8;
         }
         // check unaligned tail
         while (start < end) {
