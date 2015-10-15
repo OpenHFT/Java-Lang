@@ -87,7 +87,7 @@ public class VanillaMappedFile implements VanillaMappedResource {
         long start = System.nanoTime();
         MappedByteBuffer buffer = this.channel.map(this.mode.mapValue(),address,size);
         buffer.order(ByteOrder.nativeOrder());
-        fileLifecycleListener.onFileGrowth(path, System.nanoTime() - start);
+        fileLifecycleListener.onEvent(FileLifecycleListener.EventType.MMAP, path, System.nanoTime() - start);
         return buffer;
     }
 
@@ -105,12 +105,11 @@ public class VanillaMappedFile implements VanillaMappedResource {
             }
 
             fileChannel = raf.getChannel();
-            //fileChannel.force(true);
         } catch (Exception e) {
             throw wrap(e);
         }
 
-        fileLifecycleListener.onFileGrowth(path, System.nanoTime() - start);
+        fileLifecycleListener.onEvent(FileLifecycleListener.EventType.NEW, path, System.nanoTime() - start);
         return fileChannel;
     }
 
