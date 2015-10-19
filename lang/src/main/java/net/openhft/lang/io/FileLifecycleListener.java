@@ -29,7 +29,8 @@ public interface FileLifecycleListener {
         UNMAP,
         GROW,
         SYNC,
-        DELETE
+        DELETE,
+        CLOSE
     }
 
     enum FileLifecycleListeners implements FileLifecycleListener {
