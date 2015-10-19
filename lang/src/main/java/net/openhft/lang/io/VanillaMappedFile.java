@@ -34,7 +34,7 @@ import java.nio.channels.FileChannel;
 public class VanillaMappedFile implements VanillaMappedResource {
 
     private final File path;
-    private final FileChannel channel;
+    private final FileChannel fileChannel;
     private final VanillaMappedMode mode;
     private final long size;
     private final FileLifecycleListener fileLifecycleListener;
@@ -48,16 +48,16 @@ public class VanillaMappedFile implements VanillaMappedResource {
         this.path = path;
         this.mode = mode;
         this.size = size;
-        this.channel = fileChannel(path, mode, this.size, fileLifecycleListener);
+        this.fileChannel = fileChannel(path, mode, this.size, fileLifecycleListener);
         this.fileLifecycleListener = fileLifecycleListener;
     }
 
     public VanillaMappedBytes bytes(long address, long size) throws IOException {
-        return new VanillaMappedBytes(map(address,size), -1, null);
+        return new VanillaMappedBytes(this.path, map(address, size), -1, null, this.fileLifecycleListener);
     }
 
     public VanillaMappedBytes bytes(long address, long size, long index) throws IOException {
-        return new VanillaMappedBytes(map(address,size), index, null);
+        return new VanillaMappedBytes(this.path, map(address,size), index, null, this.fileLifecycleListener);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class VanillaMappedFile implements VanillaMappedResource {
     @Override
     public long size() {
         try {
-            return this.channel.size();
+            return this.fileChannel.size();
         } catch (IOException e) {
             return 0;
         }
@@ -76,9 +76,9 @@ public class VanillaMappedFile implements VanillaMappedResource {
 
     @Override
     public synchronized void close() throws IOException {
-        if(this.channel.isOpen()) {
+        if(this.fileChannel.isOpen()) {
             long start = System.nanoTime();
-            this.channel.close();
+            this.fileChannel.close();
             this.fileLifecycleListener.onEvent(EventType.CLOSE, this.path, System.nanoTime() - start);
         }
     }
@@ -89,7 +89,7 @@ public class VanillaMappedFile implements VanillaMappedResource {
 
     private synchronized MappedByteBuffer map(long address, long size) throws IOException {
         long start = System.nanoTime();
-        MappedByteBuffer buffer = this.channel.map(this.mode.mapValue(),address,size);
+        MappedByteBuffer buffer = this.fileChannel.map(this.mode.mapValue(),address,size);
         buffer.order(ByteOrder.nativeOrder());
         fileLifecycleListener.onEvent(EventType.MMAP, path, System.nanoTime() - start);
         return buffer;
@@ -156,6 +156,6 @@ public class VanillaMappedFile implements VanillaMappedResource {
 
     public static VanillaMappedBytes readWriteBytes(final File path, long size, long index, FileLifecycleListener fileLifecycleListener) throws IOException {
         VanillaMappedFile vmf = new VanillaMappedFile(path, VanillaMappedMode.RW, -1, fileLifecycleListener);
-        return new VanillaMappedBytes(vmf.map(0,size), index, vmf.channel);
+        return new VanillaMappedBytes(path, vmf.map(0,size), index, vmf.fileChannel, fileLifecycleListener);
     }
 }
