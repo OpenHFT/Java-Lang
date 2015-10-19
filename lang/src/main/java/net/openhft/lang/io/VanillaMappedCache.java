@@ -44,17 +44,18 @@ public class VanillaMappedCache<T> implements Closeable {
 
     public VanillaMappedCache(final int maximumCacheSize, final boolean releaseOnRemove, final boolean cleanOnClose, FileLifecycleListener fileLifecycleListener) {
         this(new LinkedHashMap<T, VanillaMappedBytes>(maximumCacheSize,1.0f,true) {
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<T, VanillaMappedBytes> eldest) {
-                boolean removed = size() >= maximumCacheSize;
-                if (removed && releaseOnRemove) {
-                    eldest.getValue().release();
-                }
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<T, VanillaMappedBytes> eldest) {
+                    boolean removed = size() >= maximumCacheSize;
+                    if (removed && releaseOnRemove) {
+                        eldest.getValue().release();
+                    }
 
-                return removed;
-            }
-        },
-                cleanOnClose, fileLifecycleListener);
+                    return removed;
+                }
+            },
+            cleanOnClose,
+            fileLifecycleListener);
     }
 
     private VanillaMappedCache(final Map<T, VanillaMappedBytes> cache, final boolean cleanOnClose, FileLifecycleListener fileLifecycleListener) {

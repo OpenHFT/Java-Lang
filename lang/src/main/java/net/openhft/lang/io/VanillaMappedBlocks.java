@@ -100,22 +100,9 @@ public class VanillaMappedBlocks implements VanillaMappedResource {
             this.mb1 = null;
         }
 
-        //int count = 0;
-
-        for (VanillaMappedBytes vmb : this.bytes) {
-            //if (!vmb.unmapped()) {
-            //    vmb.release();
-            //if (!vmb.unmapped()) {
-            //    count++;
-            //}
-            //}
-
-            vmb.cleanup();
+        for (int i = bytes.size() - 1; i >= 0; i--) {
+            bytes.get(i).cleanup();
         }
-
-        //if(count > 0) {
-        //    LOG.info(this.mappedFile.path() + ": memory mappings left unmapped, num= " + count);
-        //}
 
         this.bytes.clear();
         this.mappedFile.close();

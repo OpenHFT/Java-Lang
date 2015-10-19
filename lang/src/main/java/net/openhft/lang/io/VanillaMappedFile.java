@@ -15,6 +15,8 @@
  */
 package net.openhft.lang.io;
 
+import net.openhft.lang.io.FileLifecycleListener.EventType;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -75,7 +77,9 @@ public class VanillaMappedFile implements VanillaMappedResource {
     @Override
     public synchronized void close() throws IOException {
         if(this.channel.isOpen()) {
+            long start = System.nanoTime();
             this.channel.close();
+            this.fileLifecycleListener.onEvent(EventType.CLOSE, this.path, System.nanoTime() - start);
         }
     }
 
@@ -87,7 +91,7 @@ public class VanillaMappedFile implements VanillaMappedResource {
         long start = System.nanoTime();
         MappedByteBuffer buffer = this.channel.map(this.mode.mapValue(),address,size);
         buffer.order(ByteOrder.nativeOrder());
-        fileLifecycleListener.onFileGrowth(path, System.nanoTime() - start);
+        fileLifecycleListener.onEvent(EventType.MMAP, path, System.nanoTime() - start);
         return buffer;
     }
 
@@ -105,12 +109,11 @@ public class VanillaMappedFile implements VanillaMappedResource {
             }
 
             fileChannel = raf.getChannel();
-            //fileChannel.force(true);
         } catch (Exception e) {
             throw wrap(e);
         }
 
-        fileLifecycleListener.onFileGrowth(path, System.nanoTime() - start);
+        fileLifecycleListener.onEvent(EventType.NEW, path, System.nanoTime() - start);
         return fileChannel;
     }
 
