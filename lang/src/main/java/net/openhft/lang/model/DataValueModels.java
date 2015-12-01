@@ -39,17 +39,11 @@ public enum DataValueModels {
     public static <T> DataValueModel<T> acquireModel(Class<T> tClass) {
         if (!tClass.isInterface() || tClass.getClassLoader() == null)
             throw new IllegalArgumentException(tClass + " not supported");
-        DataValueModel<T> model;
-        try {
-            model = getModel(tClass);
+        DataValueModel<T> model = getModel(tClass);
             if (model == null) {
                 model = new DataValueModelImpl<T>(tClass);
                 putModel(tClass, model);
             }
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw e;
-        }
         return model;
     }
 }

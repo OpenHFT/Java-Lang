@@ -858,7 +858,7 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     <T> T readInstance(@NotNull Class<T> objClass, T obj);
 
     /**
-     * Reads a byte of data. This method will block if no input is available.
+     * Reads a byte of data. This method is non blocking.
      *
      * @return the byte read, or -1 if the end of the stream is reached.
      */
