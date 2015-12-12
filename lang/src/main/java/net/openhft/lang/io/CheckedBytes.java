@@ -189,14 +189,14 @@ public class CheckedBytes implements Bytes {
     }
 
     @NotNull
-    public String parseUTF(@NotNull StopCharTester tester) {
+    public String parseUtf8(@NotNull StopCharTester tester) {
         this.checkNotClosed();
-        return this.bytes.parseUTF(tester);
+        return this.bytes.parseUtf8(tester);
     }
 
-    public void parseUTF(@NotNull StringBuilder builder, @NotNull StopCharTester tester) {
+    public void parseUtf8(@NotNull StringBuilder builder, @NotNull StopCharTester tester) {
         this.checkNotClosed();
-        this.bytes.parseUTF(builder, tester);
+        this.bytes.parseUtf8(builder, tester);
     }
 
     public boolean stepBackAndSkipTo(@NotNull StopCharTester tester) {

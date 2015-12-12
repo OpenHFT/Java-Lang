@@ -43,7 +43,7 @@ public class ParserExampleMain {
             bufferBytes.write(bytes);
             bufferBytes.position(0);
             // decode message
-            String word = bufferBytes.parseUTF(StopCharTesters.COMMA_STOP);
+            String word = bufferBytes.parseUtf8(StopCharTesters.COMMA_STOP);
             double low = bufferBytes.parseDouble();
             double curr = bufferBytes.parseDouble();
             double high = bufferBytes.parseDouble();

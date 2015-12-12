@@ -598,7 +598,7 @@ public abstract class AbstractBytes implements Bytes {
     @Override
     public Boolean parseBoolean(@NotNull StopCharTester tester) {
         StringBuilder sb = acquireStringBuilder();
-        parseUTF(sb, tester);
+        parseUtf8(sb, tester);
         if (sb.length() == 0)
             return null;
         switch (sb.charAt(0)) {
@@ -745,14 +745,14 @@ public abstract class AbstractBytes implements Bytes {
 
     @NotNull
     @Override
-    public String parseUTF(@NotNull StopCharTester tester) {
+    public String parseUtf8(@NotNull StopCharTester tester) {
         StringBuilder utfReader = acquireStringBuilder();
-        parseUTF(utfReader, tester);
+        parseUtf8(utfReader, tester);
         return stringInterner().intern(utfReader);
     }
 
     @Override
-    public void parseUTF(@NotNull StringBuilder builder, @NotNull StopCharTester tester) {
+    public void parseUtf8(@NotNull StringBuilder builder, @NotNull StopCharTester tester) {
         builder.setLength(0);
         try {
             readUTF0(builder, tester);
@@ -2172,7 +2172,7 @@ public abstract class AbstractBytes implements Bytes {
     @SuppressWarnings("unchecked")
     @Override
     public <E extends Enum<E>> E parseEnum(@NotNull Class<E> eClass, @NotNull StopCharTester tester) {
-        String text = parseUTF(tester);
+        String text = parseUtf8(tester);
         if (text.isEmpty())
             return null;
         return EnumInterner.intern(eClass, text);

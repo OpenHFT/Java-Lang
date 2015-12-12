@@ -63,10 +63,10 @@ public interface ByteStringParser extends BytesCommon {
      * @param builder to zeroOut and append to.
      * @param tester  to detect when to stop.
      */
-    void parseUTF(@NotNull StringBuilder builder, @NotNull StopCharTester tester) throws BufferUnderflowException;
+    void parseUtf8(@NotNull StringBuilder builder, @NotNull StopCharTester tester) throws BufferUnderflowException;
 
     @NotNull
-    String parseUTF(@NotNull StopCharTester tester) throws BufferUnderflowException;
+    String parseUtf8(@NotNull StopCharTester tester) throws BufferUnderflowException;
 
     @Nullable
     <E extends Enum<E>> E parseEnum(@NotNull Class<E> eClass, @NotNull StopCharTester tester) throws BufferUnderflowException;

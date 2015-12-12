@@ -499,8 +499,8 @@ public abstract class WrappedBytes<B extends Bytes> implements Bytes {
         wrapped.unlockRWWriteLock(offset);
     }
 
-    public void parseUTF(@NotNull StringBuilder builder, @NotNull StopCharTester tester) throws BufferUnderflowException {
-        wrapped.parseUTF(builder, tester);
+    public void parseUtf8(@NotNull StringBuilder builder, @NotNull StopCharTester tester) throws BufferUnderflowException {
+        wrapped.parseUtf8(builder, tester);
     }
 
     @NotNull
@@ -636,8 +636,8 @@ public abstract class WrappedBytes<B extends Bytes> implements Bytes {
     }
 
     @NotNull
-    public String parseUTF(@NotNull StopCharTester tester) throws BufferUnderflowException {
-        return wrapped.parseUTF(tester);
+    public String parseUtf8(@NotNull StopCharTester tester) throws BufferUnderflowException {
+        return wrapped.parseUtf8(tester);
     }
 
     public int readInt() {

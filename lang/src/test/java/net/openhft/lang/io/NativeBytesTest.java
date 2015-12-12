@@ -196,7 +196,7 @@ public class NativeBytesTest {
         bytes.position(0);
         bytes.append(d, precision).append(' ');
         bytes.position(0);
-        String text = bytes.parseUTF(SPACE_STOP);
+        String text = bytes.parseUtf8(SPACE_STOP);
         bytes.position(0);
         assertEquals(0, bytes.position());
         double d2 = bytes.parseDouble();
@@ -275,17 +275,17 @@ public class NativeBytesTest {
         bytes.append('\t');
         bytes.flip();
         for (String word : words) {
-            assertEquals(word, bytes.parseUTF(CONTROL_STOP));
+            assertEquals(word, bytes.parseUtf8(CONTROL_STOP));
         }
-        assertEquals("", bytes.parseUTF(CONTROL_STOP));
+        assertEquals("", bytes.parseUtf8(CONTROL_STOP));
 
         bytes.position(0);
         StringBuilder sb = new StringBuilder();
         for (String word : words) {
-            bytes.parseUTF(sb, CONTROL_STOP);
+            bytes.parseUtf8(sb, CONTROL_STOP);
             assertEquals(word, sb.toString());
         }
-        bytes.parseUTF(sb, CONTROL_STOP);
+        bytes.parseUtf8(sb, CONTROL_STOP);
         assertEquals("", sb.toString());
 
         bytes.position(0);
@@ -595,8 +595,8 @@ public class NativeBytesTest {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd'T'HH:mm:ss.SSS");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         String asStr = sdf.format(new Date(now));
-        assertEquals(asStr, bytes.parseUTF(SPACE_STOP));
-        assertEquals(asStr, bytes.parseUTF(SPACE_STOP));
+        assertEquals(asStr, bytes.parseUtf8(SPACE_STOP));
+        assertEquals(asStr, bytes.parseUtf8(SPACE_STOP));
     }
 
     @Test
@@ -669,7 +669,7 @@ public class NativeBytesTest {
     public void testAppendSubstring() {
         bytes.append("Hello World", 2, 7).append("\n");
         bytes.position(0);
-        assertEquals("Hello World".substring(2, 7), bytes.parseUTF(CONTROL_STOP));
+        assertEquals("Hello World".substring(2, 7), bytes.parseUtf8(CONTROL_STOP));
     }
 
     @Test
@@ -696,7 +696,7 @@ public class NativeBytesTest {
         assertEquals(false, bytes.parseBoolean(SPACE_STOP));
         assertEquals(true, bytes.parseBoolean(SPACE_STOP));
         assertEquals(null, bytes.parseBoolean(SPACE_STOP));
-        assertEquals("word£€", bytes.parseUTF(SPACE_STOP));
+        assertEquals("word£€", bytes.parseUtf8(SPACE_STOP));
         assertEquals(BuySell.Buy, bytes.parseEnum(BuySell.class, SPACE_STOP));
         assertEquals(1234, bytes.parseLong());
         assertEquals(123456L, bytes.parseLong());
@@ -711,7 +711,7 @@ public class NativeBytesTest {
         assertEquals(null, bytes.parseBoolean(ALL));
         assertEquals(0L, bytes.parseLong());
         assertEquals(0.0, bytes.parseDouble(), 0.0);
-        assertEquals("", bytes.parseUTF(ALL));
+        assertEquals("", bytes.parseUtf8(ALL));
         assertEquals(null, bytes.parseEnum(StopCharTesters.class, ALL));
 
         bytes.selfTerminating(false);
@@ -728,7 +728,7 @@ public class NativeBytesTest {
         } catch (BufferUnderflowException ignored) {
         }
         try {
-            fail("got " + bytes.parseUTF(ALL));
+            fail("got " + bytes.parseUtf8(ALL));
         } catch (BufferUnderflowException ignored) {
         }
         try {
@@ -756,7 +756,7 @@ public class NativeBytesTest {
         bytes.write(4, "0".getBytes());
         bytes.write(5, " w".getBytes(), 0, 2);
         bytes.position(0);
-        assertEquals("Hell0 worl bye", bytes.parseUTF(CONTROL_STOP));
+        assertEquals("Hell0 worl bye", bytes.parseUtf8(CONTROL_STOP));
     }
 
     @Test
@@ -764,7 +764,7 @@ public class NativeBytesTest {
         bytes.append(Arrays.asList(1, 2, 3, 4, 5), ";").append(' ');
         bytes.append(new TreeSet<Integer>(Arrays.asList(21, 2, 13, 4, 5)), ";");
         bytes.position(0);
-        assertEquals("1;2;3;4;5 2;4;5;13;21", bytes.parseUTF(CONTROL_STOP));
+        assertEquals("1;2;3;4;5 2;4;5;13;21", bytes.parseUtf8(CONTROL_STOP));
     }
 
     @Test
@@ -789,7 +789,7 @@ public class NativeBytesTest {
         bytes.position(0);
         bytes.parseDecimal(md2);
         bytes.position(0);
-        String text = bytes.parseUTF(CONTROL_STOP);
+        String text = bytes.parseUtf8(CONTROL_STOP);
         if (!md.equals(md2))
             assertEquals("n: " + n + ", s: " + j + " t: " + text, md, md2);
     }
