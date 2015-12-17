@@ -905,6 +905,12 @@ public class CheckedBytes implements Bytes {
         return this.bytes.toDebugString(limit);
     }
 
+    @Override
+    public String toHexString(long limit) {
+        this.checkNotClosed();
+        return this.bytes.toHexString(limit);
+    }
+
     public void toString(Appendable sb, long start, long position, long end) {
         this.checkNotClosed();
         this.bytes.toString(sb, start, position, end);

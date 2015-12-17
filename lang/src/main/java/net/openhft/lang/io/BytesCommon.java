@@ -238,4 +238,6 @@ public interface BytesCommon {
     String toDebugString();
 
     String toDebugString(long limit);
+
+    String toHexString(long limit);
 }

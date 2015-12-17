@@ -2863,6 +2863,89 @@ public abstract class AbstractBytes implements Bytes {
     }
 
     @Override
+    public String toHexString(long limit) {
+        return toHexString(this, position(), Math.min(remaining(), limit));
+    }
+
+    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
+
+    public static String toHexString(@NotNull final Bytes bytes, long offset, long len) throws BufferUnderflowException {
+        if (len == 0)
+            return "";
+
+        int width = 16;
+        int[] lastLine = new int[width];
+        String sep = "";
+        long position = bytes.position();
+        long limit = bytes.limit();
+
+        try {
+
+            bytes.limit(offset + len);
+            bytes.position(offset);
+
+            final StringBuilder builder = new StringBuilder();
+            long start = offset / width * width;
+            long end = (offset + len + width - 1) / width * width;
+            for (long i = start; i < end; i += width) {
+                // check for duplicate rows
+                if (i + width < end) {
+                    boolean same = true;
+
+                    for (int j = 0; j < width && i + j < offset + len; j++) {
+                        int ch = bytes.readUnsignedByte(i + j);
+                        same &= (ch == lastLine[j]);
+                        lastLine[j] = ch;
+                    }
+                    if (i > start && same) {
+                        sep = "........\n";
+                        continue;
+                    }
+                }
+                builder.append(sep);
+                sep = "";
+                String str = Long.toHexString(i);
+                for (int j = str.length(); j < 8; j++)
+                    builder.append('0');
+                builder.append(str);
+                for (int j = 0; j < width; j++) {
+                    if (j == width / 2)
+                        builder.append(' ');
+                    if (i + j < start || i + j >= offset + len) {
+                        builder.append("   ");
+
+                    } else {
+                        builder.append(' ');
+                        int ch = bytes.readUnsignedByte(i + j);
+                        builder.append(HEXI_DECIMAL[ch >> 4]);
+                        builder.append(HEXI_DECIMAL[ch & 15]);
+                    }
+                }
+                builder.append(' ');
+                for (int j = 0; j < width; j++) {
+                    if (j == width / 2)
+                        builder.append(' ');
+                    if (i + j < start || i + j >= offset + len) {
+                        builder.append(' ');
+
+                    } else {
+                        int ch = bytes.readUnsignedByte(i + j);
+                        if (ch < ' ' || ch > 126)
+                            ch = '\u00B7';
+                        builder.append((char) ch);
+                    }
+                }
+                builder.append("\n");
+            }
+            return builder.toString();
+        } finally {
+            bytes.limit(limit);
+            bytes.position(position);
+        }
+    }
+
+
+    @Override
     public void toString(Appendable sb, long start, long position, long end) {
         try {
             // before

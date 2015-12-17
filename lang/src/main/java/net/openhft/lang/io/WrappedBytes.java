@@ -60,6 +60,11 @@ public abstract class WrappedBytes<B extends Bytes> implements Bytes {
     }
 
     @Override
+    public String toHexString(long limit) {
+        return wrapped.toHexString(limit);
+    }
+
+    @Override
     public boolean compare(long offset, RandomDataInput input, long inputOffset, long len) {
         return wrapped.compare(offset, input, inputOffset, len);
     }
