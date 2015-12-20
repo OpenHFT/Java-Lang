@@ -44,7 +44,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.10.27</version>
+                <version>1.8.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -185,19 +185,19 @@
                             <forkMode>never</forkMode>
                         </configuration>
                     </plugin>
-                    <!-- <plugin>
-                         <groupId>org.pitest</groupId>
-                         <artifactId>pitest-maven</artifactId>
-                         <version>0.33</version>
-                         <configuration>
-                             <targetClasses>
-                                 <param>net.openhft.lang.collection.*</param>
-                             </targetClasses>
-                             <targetTests>
-                                 <param>net.openhft.lang.collection.*</param>
-                             </targetTests>
-                         </configuration>
-                     </plugin>-->
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>0.33</version>
+                        <configuration>
+                            <targetClasses>
+                                <param>net.openhft.lang.collection.*</param>
+                            </targetClasses>
+                            <targetTests>
+                                <param>net.openhft.lang.collection.*</param>
+                            </targetTests>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
