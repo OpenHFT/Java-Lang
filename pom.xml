@@ -40,5 +40,13 @@
         <!--<module>lang-sandbox</module>-->
     </modules>
 
+
+    <scm>
+        <url>scm:git:git@github.com:OpenHFT/Java-Lang.git</url>
+        <connection>scm:git:git@github.com:OpenHFT/Java-Lang.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Java-Lang.git</developerConnection>
+        <tag>master</tag>
+    </scm>
+
 </project>
 
