@@ -44,8 +44,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
+
+import static java.lang.Long.numberOfTrailingZeros;
 
 /**
  * @author peter.lawrey
@@ -61,6 +61,7 @@ public abstract class AbstractBytes implements Bytes {
     static final long RW_WRITE_WAITING = 1L << RW_LOCK_LIMIT;
     static final long RW_WRITE_LOCKED = 1L << 2 * RW_LOCK_LIMIT;
     static final int RW_LOCK_MASK = (1 << RW_LOCK_LIMIT) - 1;
+    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
     private static final long BUSY_LOCK_LIMIT = 20L * 1000 * 1000 * 1000;
     private static final int INT_LOCK_MASK;
     private static final int UNSIGNED_BYTE_MASK = 0xFF;
@@ -465,6 +466,81 @@ public abstract class AbstractBytes implements Bytes {
         return (int) (lock >>> (2 * RW_LOCK_LIMIT));
     }
 
+    public static String toHexString(@NotNull final Bytes bytes, long offset, long len) throws BufferUnderflowException {
+        if (len == 0)
+            return "";
+
+        int width = 16;
+        int[] lastLine = new int[width];
+        String sep = "";
+        long position = bytes.position();
+        long limit = bytes.limit();
+
+        try {
+
+            bytes.limit(offset + len);
+            bytes.position(offset);
+
+            final StringBuilder builder = new StringBuilder();
+            long start = offset / width * width;
+            long end = (offset + len + width - 1) / width * width;
+            for (long i = start; i < end; i += width) {
+                // check for duplicate rows
+                if (i + width < end) {
+                    boolean same = true;
+
+                    for (int j = 0; j < width && i + j < offset + len; j++) {
+                        int ch = bytes.readUnsignedByte(i + j);
+                        same &= (ch == lastLine[j]);
+                        lastLine[j] = ch;
+                    }
+                    if (i > start && same) {
+                        sep = "........\n";
+                        continue;
+                    }
+                }
+                builder.append(sep);
+                sep = "";
+                String str = Long.toHexString(i);
+                for (int j = str.length(); j < 8; j++)
+                    builder.append('0');
+                builder.append(str);
+                for (int j = 0; j < width; j++) {
+                    if (j == width / 2)
+                        builder.append(' ');
+                    if (i + j < start || i + j >= offset + len) {
+                        builder.append("   ");
+
+                    } else {
+                        builder.append(' ');
+                        int ch = bytes.readUnsignedByte(i + j);
+                        builder.append(HEXI_DECIMAL[ch >> 4]);
+                        builder.append(HEXI_DECIMAL[ch & 15]);
+                    }
+                }
+                builder.append(' ');
+                for (int j = 0; j < width; j++) {
+                    if (j == width / 2)
+                        builder.append(' ');
+                    if (i + j < start || i + j >= offset + len) {
+                        builder.append(' ');
+
+                    } else {
+                        int ch = bytes.readUnsignedByte(i + j);
+                        if (ch < ' ' || ch > 126)
+                            ch = '\u00B7';
+                        builder.append((char) ch);
+                    }
+                }
+                builder.append("\n");
+            }
+            return builder.toString();
+        } finally {
+            bytes.limit(limit);
+            bytes.position(position);
+        }
+    }
+
     protected void setObjectSerializer(ObjectSerializer objectSerializer) {
         this.objectSerializer = objectSerializer;
     }
@@ -579,6 +655,8 @@ public abstract class AbstractBytes implements Bytes {
         this.selfTerminating = selfTerminating;
     }
 
+    // RandomDataOutput
+
     @Override
     public boolean selfTerminating() {
         return selfTerminating;
@@ -588,8 +666,6 @@ public abstract class AbstractBytes implements Bytes {
     public int readUnsignedByteOrThrow() throws BufferUnderflowException {
         return readByteOrThrow(selfTerminating);
     }
-
-    // RandomDataOutput
 
     public int readByteOrThrow(boolean selfTerminating) throws BufferUnderflowException {
         return remaining() < 1 ? returnOrThrowEndOfBuffer(selfTerminating) : readUnsignedByte();
@@ -2158,6 +2234,30 @@ public abstract class AbstractBytes implements Bytes {
         }
     }
 
+    @Override
+    public long nextSetBit(long fromIndex) {
+        if (fromIndex < 0)
+            throw new IndexOutOfBoundsException();
+        long maxBit = capacity() << 3;
+        long fromLongIndex = fromIndex & ~63;
+        if (fromLongIndex >= maxBit)
+            return -1;
+        long firstByte = fromLongIndex >>> 3;
+        if ((fromIndex & 63) != 0) {
+            long l = readVolatileLong(firstByte) >>> fromIndex;
+            if (l != 0) {
+                return fromIndex + numberOfTrailingZeros(l);
+            }
+            firstByte += 8;
+        }
+        for (long i = firstByte; i < capacity(); i += 8) {
+            long l = readLong(i);
+            if (l != 0)
+                return (i << 3) + numberOfTrailingZeros(l);
+        }
+        return -1;
+    }
+
     private <E extends Enum<E>> E readEnum2(Class<E> eClass) {
         try {
             StringBuilder sb = acquireStringBuilder();
@@ -2866,84 +2966,6 @@ public abstract class AbstractBytes implements Bytes {
     public String toHexString(long limit) {
         return toHexString(this, position(), Math.min(remaining(), limit));
     }
-
-    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
-
-    public static String toHexString(@NotNull final Bytes bytes, long offset, long len) throws BufferUnderflowException {
-        if (len == 0)
-            return "";
-
-        int width = 16;
-        int[] lastLine = new int[width];
-        String sep = "";
-        long position = bytes.position();
-        long limit = bytes.limit();
-
-        try {
-
-            bytes.limit(offset + len);
-            bytes.position(offset);
-
-            final StringBuilder builder = new StringBuilder();
-            long start = offset / width * width;
-            long end = (offset + len + width - 1) / width * width;
-            for (long i = start; i < end; i += width) {
-                // check for duplicate rows
-                if (i + width < end) {
-                    boolean same = true;
-
-                    for (int j = 0; j < width && i + j < offset + len; j++) {
-                        int ch = bytes.readUnsignedByte(i + j);
-                        same &= (ch == lastLine[j]);
-                        lastLine[j] = ch;
-                    }
-                    if (i > start && same) {
-                        sep = "........\n";
-                        continue;
-                    }
-                }
-                builder.append(sep);
-                sep = "";
-                String str = Long.toHexString(i);
-                for (int j = str.length(); j < 8; j++)
-                    builder.append('0');
-                builder.append(str);
-                for (int j = 0; j < width; j++) {
-                    if (j == width / 2)
-                        builder.append(' ');
-                    if (i + j < start || i + j >= offset + len) {
-                        builder.append("   ");
-
-                    } else {
-                        builder.append(' ');
-                        int ch = bytes.readUnsignedByte(i + j);
-                        builder.append(HEXI_DECIMAL[ch >> 4]);
-                        builder.append(HEXI_DECIMAL[ch & 15]);
-                    }
-                }
-                builder.append(' ');
-                for (int j = 0; j < width; j++) {
-                    if (j == width / 2)
-                        builder.append(' ');
-                    if (i + j < start || i + j >= offset + len) {
-                        builder.append(' ');
-
-                    } else {
-                        int ch = bytes.readUnsignedByte(i + j);
-                        if (ch < ' ' || ch > 126)
-                            ch = '\u00B7';
-                        builder.append((char) ch);
-                    }
-                }
-                builder.append("\n");
-            }
-            return builder.toString();
-        } finally {
-            bytes.limit(limit);
-            bytes.position(position);
-        }
-    }
-
 
     @Override
     public void toString(Appendable sb, long start, long position, long end) {

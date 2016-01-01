@@ -920,4 +920,12 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     boolean compare(long offset, RandomDataInput input, long inputOffset, long len);
 
     <E> E readEnum(long offset, int maxSize, Class<E> eClass);
+
+    /**
+     * From a given bit index, find the next bit with is set.
+     *
+     * @param fromIndex first bit to scan.
+     * @return first bit equals or after it which is set.
+     */
+    long nextSetBit(long fromIndex);
 }

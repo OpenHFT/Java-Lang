@@ -29,6 +29,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.Long.numberOfTrailingZeros;
+
 /**
  * @author peter.lawrey
  */
@@ -118,6 +120,24 @@ public class NativeBytes extends AbstractBytes {
         for (; pos < len; pos++)
             hash = hash * 57 + bytes[off + pos];
         return hash;
+    }
+
+    static long nextSetBit0(int firstByte, int maximum, long startAddr) {
+        for (int i = firstByte; i < maximum; i += 8) {
+            long l = UNSAFE.getLong(startAddr + i);
+            if (l != 0)
+                return (i << 3) + numberOfTrailingZeros(l);
+        }
+        return -1;
+    }
+
+    static long nextSetBit0(long firstByte, long maximum, long startAddr) {
+        for (long i = firstByte; i < maximum; i += 8) {
+            long l = UNSAFE.getLong(startAddr + i);
+            if (l != 0)
+                return (i << 3) + numberOfTrailingZeros(l);
+        }
+        return -1;
     }
 
     public void setStartPositionAddress(long startAddr) {
@@ -804,5 +824,27 @@ public class NativeBytes extends AbstractBytes {
 
     void capacity(long capacity) {
         this.limitAddr = this.capacityAddr = capacity;
+    }
+
+    @Override
+    public long nextSetBit(long fromIndex) {
+        if (fromIndex < 0)
+            throw new IndexOutOfBoundsException();
+        long capacity = capacity();
+        long maxBit = capacity << 3;
+        long fromLongIndex = fromIndex & ~63;
+        if (fromLongIndex >= maxBit)
+            return -1;
+        long firstByte = fromLongIndex >>> 3;
+        if ((fromIndex & 63) != 0) {
+            long l = UNSAFE.getLongVolatile(null, startAddr + firstByte) >>> fromIndex;
+            if (l != 0) {
+                return fromIndex + numberOfTrailingZeros(l);
+            }
+            firstByte += 8;
+        }
+        if (capacity < Integer.MAX_VALUE)
+            return nextSetBit0((int) firstByte, (int) capacity, startAddr);
+        return nextSetBit0(firstByte, capacity, startAddr);
     }
 }

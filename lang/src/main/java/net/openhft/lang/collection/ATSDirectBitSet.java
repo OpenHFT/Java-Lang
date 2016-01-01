@@ -29,10 +29,22 @@ public class ATSDirectBitSet implements DirectBitSet {
     private final Bytes bytes;
     private final long longLength;
 
-    public ATSDirectBitSet(Bytes bytes) {
+    private ATSDirectBitSet(Bytes bytes) {
         this.bytes = bytes;
         assert (bytes.capacity() & 7) == 0;
         longLength = bytes.capacity() >> 3;
+    }
+
+    public static DirectBitSet wrap(Bytes bytes) {
+        return new ATSDirectBitSet(bytes);
+    }
+
+    private static long rightShiftOneFill(long l, long shift) {
+        return (l >> shift) | ~(ALL_ONES >>> shift);
+    }
+
+    private static long leftShiftOneFill(long l, long shift) {
+        return (l << shift) | ((1L << shift) - 1L);
     }
 
     private long readLong(long longIndex) {
@@ -363,61 +375,7 @@ public class ATSDirectBitSet implements DirectBitSet {
 
     @Override
     public long nextSetBit(long fromIndex) {
-        if (fromIndex < 0)
-            throw new IndexOutOfBoundsException();
-        long fromLongIndex = longWithThisBit(fromIndex);
-        if (fromLongIndex >= longLength)
-            return NOT_FOUND;
-        long l = readVolatileLong(fromLongIndex) >>> fromIndex;
-        if (l != 0) {
-            return fromIndex + numberOfTrailingZeros(l);
-        }
-        for (long i = fromLongIndex + 1; i < longLength; i++) {
-            l = readLong(i);
-            if (l != 0)
-                return firstBit(i) + numberOfTrailingZeros(l);
-        }
-        return NOT_FOUND;
-    }
-
-    private class SetBits implements Bits {
-        private long byteIndex = 0;
-        private final long byteLength = longLength << 3;
-        private long bitIndex = 0;
-
-        @Override
-        public long next() {
-            long bitIndex = this.bitIndex;
-            if (bitIndex >= 0) {
-                long i = byteIndex;
-                long l = bytes.readVolatileLong(i) >>> bitIndex;
-                if (l != 0) {
-                    int trailingZeros = numberOfTrailingZeros(l);
-                    long index = bitIndex + trailingZeros;
-                    if (((this.bitIndex = index + 1) & 63) == 0) {
-                        if ((byteIndex = i + 8) == byteLength)
-                            this.bitIndex = -1;
-                    }
-                    return index;
-                }
-                for (long lim = byteLength; (i += 8) < lim; ) {
-                    if ((l = bytes.readLong(i)) != 0) {
-                        int trailingZeros = numberOfTrailingZeros(l);
-                        long index = (i << 3) + trailingZeros;
-                        if (((this.bitIndex = index + 1) & 63) != 0) {
-                            byteIndex = i;
-
-                        } else {
-                            if ((byteIndex = i + 8) == lim)
-                                this.bitIndex = -1;
-                        }
-                        return index;
-                    }
-                }
-            }
-            this.bitIndex = -1;
-            return -1;
-        }
+        return bytes.nextSetBit(fromIndex);
     }
 
     @Override
@@ -764,10 +722,6 @@ public class ATSDirectBitSet implements DirectBitSet {
         }
     }
 
-    private static long rightShiftOneFill(long l, long shift) {
-        return (l >> shift) | ~(ALL_ONES >>> shift);
-    }
-
     /**
      * WARNING! This implementation doesn't strictly follow the contract
      * from {@code DirectBitSet} interface. For the sake of atomicity this
@@ -775,7 +729,7 @@ public class ATSDirectBitSet implements DirectBitSet {
      * boundary, e. g. bits from 55 to 75 (boundary is 64).
      *
      * @throws IllegalArgumentException if {@code numberOfBits}
-     *         is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
+     *                                  is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
      */
     @Override
     public long setNextNContinuousClearBits(long fromIndex, int numberOfBits) {
@@ -879,7 +833,7 @@ public class ATSDirectBitSet implements DirectBitSet {
      * boundary, e. g. bits from 55 to 75 (boundary is 64).
      *
      * @throws IllegalArgumentException if {@code numberOfBits}
-     *         is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
+     *                                  is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
      */
     @Override
     public long clearNextNContinuousSetBits(long fromIndex, int numberOfBits) {
@@ -967,10 +921,6 @@ public class ATSDirectBitSet implements DirectBitSet {
         }
     }
 
-    private static long leftShiftOneFill(long l, long shift) {
-        return (l << shift) | ((1L << shift) - 1L);
-    }
-
     /**
      * WARNING! This implementation doesn't strictly follow the contract
      * from {@code DirectBitSet} interface. For the sake of atomicity this
@@ -978,7 +928,7 @@ public class ATSDirectBitSet implements DirectBitSet {
      * boundary, e. g. bits from 55 to 75 (boundary is 64).
      *
      * @throws IllegalArgumentException if {@code numberOfBits}
-     *         is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
+     *                                  is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
      */
     @Override
     public long setPreviousNContinuousClearBits(
@@ -1078,7 +1028,7 @@ public class ATSDirectBitSet implements DirectBitSet {
      * boundary, e. g. bits from 55 to 75 (boundary is 64).
      *
      * @throws IllegalArgumentException if {@code numberOfBits}
-     *         is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
+     *                                  is out of range {@code 0 < numberOfBits && numberOfBits <= 64}
      */
     @Override
     public long clearPreviousNContinuousSetBits(
@@ -1165,6 +1115,46 @@ public class ATSDirectBitSet implements DirectBitSet {
             byteIndex -= 8;
             bitIndex = lastBit(longIndex);
             l = w = bytes.readLong(byteIndex);
+        }
+    }
+
+    private class SetBits implements Bits {
+        private final long byteLength = longLength << 3;
+        private long byteIndex = 0;
+        private long bitIndex = 0;
+
+        @Override
+        public long next() {
+            long bitIndex = this.bitIndex;
+            if (bitIndex >= 0) {
+                long i = byteIndex;
+                long l = bytes.readVolatileLong(i) >>> bitIndex;
+                if (l != 0) {
+                    int trailingZeros = numberOfTrailingZeros(l);
+                    long index = bitIndex + trailingZeros;
+                    if (((this.bitIndex = index + 1) & 63) == 0) {
+                        if ((byteIndex = i + 8) == byteLength)
+                            this.bitIndex = -1;
+                    }
+                    return index;
+                }
+                for (long lim = byteLength; (i += 8) < lim; ) {
+                    if ((l = bytes.readLong(i)) != 0) {
+                        int trailingZeros = numberOfTrailingZeros(l);
+                        long index = (i << 3) + trailingZeros;
+                        if (((this.bitIndex = index + 1) & 63) != 0) {
+                            byteIndex = i;
+
+                        } else {
+                            if ((byteIndex = i + 8) == lim)
+                                this.bitIndex = -1;
+                        }
+                        return index;
+                    }
+                }
+            }
+            this.bitIndex = -1;
+            return -1;
         }
     }
 }

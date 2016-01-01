@@ -30,6 +30,10 @@ public class DirectBitSetBuilder {
         assert assertions = true;
     }
 
+    static DirectBitSet wrap(Bytes bytes) {
+        return ATSDirectBitSet.wrap(bytes);
+    }
+
     public DirectBitSetBuilder assertions(boolean assertions) {
         this.assertions = assertions;
         return this;
@@ -50,9 +54,5 @@ public class DirectBitSetBuilder {
 
     public DirectBitSet create(long size) {
         return wrap(DirectStore.allocate((size + 7) >>> 3).bytes());
-    }
-
-    static DirectBitSet wrap(Bytes bytes) {
-        return new ATSDirectBitSet(bytes);
     }
 }

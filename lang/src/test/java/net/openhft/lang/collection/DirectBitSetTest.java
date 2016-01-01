@@ -31,31 +31,7 @@ import static org.junit.Assert.*;
 @RunWith(value = Parameterized.class)
 public class DirectBitSetTest {
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        int capacityInBytes = 256 / 8;
-        return Arrays.asList(new Object[][]{
-                {
-                        new ATSDirectBitSet(ByteBufferBytes.wrap(
-                                ByteBuffer.allocate(capacityInBytes)))
-                },
-                {
-                        new SingleThreadedDirectBitSet(ByteBufferBytes.wrap(
-                                ByteBuffer.allocate(capacityInBytes)))
-                },
-                {
-                        new ATSDirectBitSet(ByteBufferBytes.wrap(
-                                ByteBuffer.allocateDirect(capacityInBytes)))
-                },
-                {
-                        new SingleThreadedDirectBitSet(ByteBufferBytes.wrap(
-                                ByteBuffer.allocateDirect(capacityInBytes)))
-                }
-        });
-    }
-
     private static final int[] INDICES = new int[]{0, 50, 100, 127, 128, 255};
-
     private DirectBitSet bs;
     private boolean singleThreaded;
     private SingleThreadedDirectBitSet st;
@@ -66,6 +42,29 @@ public class DirectBitSetTest {
         if (singleThreaded)
             st = (SingleThreadedDirectBitSet) bs;
         assertTrue(bs.size() >= 256);
+    }
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        int capacityInBytes = 256 / 8;
+        return Arrays.asList(new Object[][]{
+                {
+                        ATSDirectBitSet.wrap(ByteBufferBytes.wrap(
+                                ByteBuffer.allocate(capacityInBytes)))
+                },
+                {
+                        new SingleThreadedDirectBitSet(ByteBufferBytes.wrap(
+                                ByteBuffer.allocate(capacityInBytes)))
+                },
+                {
+                        ATSDirectBitSet.wrap(ByteBufferBytes.wrap(
+                                ByteBuffer.allocateDirect(capacityInBytes)))
+                },
+                {
+                        new SingleThreadedDirectBitSet(ByteBufferBytes.wrap(
+                                ByteBuffer.allocateDirect(capacityInBytes)))
+                }
+        });
     }
 
     private void setIndices() {

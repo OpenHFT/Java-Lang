@@ -29,14 +29,26 @@ public class SingleThreadedDirectBitSet implements DirectBitSet {
     public static final long ALL_ONES = ~0L;
 
     // masks
+    private Bytes bytes;
+    private long longLength;
+
+    public SingleThreadedDirectBitSet(Bytes bytes) {
+        reuse(bytes);
+    }
 
     static long singleBit(long bitIndex) {
+        return 1L << bitIndex;
+    }
+
+    static long singleBit(int bitIndex) {
         return 1L << bitIndex;
     }
 
     static long higherBitsIncludingThis(long bitIndex) {
         return ALL_ONES << bitIndex;
     }
+
+    // conversions
 
     static long lowerBitsIncludingThis(long bitIndex) {
         return ALL_ONES >>> ~bitIndex;
@@ -49,8 +61,6 @@ public class SingleThreadedDirectBitSet implements DirectBitSet {
     static long lowerBitsExcludingThis(long bitIndex) {
         return ~(ALL_ONES << bitIndex);
     }
-
-    // conversions
 
     static long longWithThisBit(long bitIndex) {
         return bitIndex >> 6;
@@ -68,27 +78,12 @@ public class SingleThreadedDirectBitSet implements DirectBitSet {
         return firstBit(longIndex) + 63;
     }
 
-    private Bytes bytes;
-    private long longLength;
-
-    public SingleThreadedDirectBitSet() {
-    }
-
-    public SingleThreadedDirectBitSet(Bytes bytes) {
-        reuse(bytes);
-    }
-
-    public void reuse(Bytes bytes) {
-        this.bytes = bytes;
-        longLength = bytes.capacity() >> 3;
-    }
-
-    // checks
-
     static void checkNumberOfBits(int numberOfBits) {
         if (numberOfBits <= 0 || numberOfBits > 64)
             throw new IllegalArgumentException("Illegal number of bits: " + numberOfBits);
     }
+
+    // checks
 
     static boolean checkNotFoundIndex(long fromIndex) {
         if (fromIndex < 0) {
@@ -97,6 +92,11 @@ public class SingleThreadedDirectBitSet implements DirectBitSet {
             throw new IndexOutOfBoundsException();
         }
         return false;
+    }
+
+    public void reuse(Bytes bytes) {
+        this.bytes = bytes;
+        longLength = bytes.capacity() >> 3;
     }
 
     private void checkIndex(long bitIndex, long longIndex) {
@@ -490,34 +490,6 @@ public class SingleThreadedDirectBitSet implements DirectBitSet {
                 return firstBit(i) + numberOfTrailingZeros(l);
         }
         return NOT_FOUND;
-    }
-
-    private class SetBits implements Bits {
-        private long byteIndex = 0;
-        private final long byteLength = longLength << 3;
-        private long bitIndex = -1;
-        private long currentWord = bytes.readLong(0);
-
-        @Override
-        public long next() {
-            long l;
-            if ((l = currentWord) != 0) {
-                int trailingZeros = numberOfTrailingZeros(l);
-                currentWord = (l >>> trailingZeros) >>> 1;
-                return bitIndex += trailingZeros + 1;
-            }
-            for (long i = byteIndex, lim = byteLength; (i += 8) < lim; ) {
-                if ((l = bytes.readLong(i)) != 0) {
-                    byteIndex = i;
-                    int trailingZeros = numberOfTrailingZeros(l);
-                    currentWord = (l >>> trailingZeros) >>> 1;
-                    return bitIndex = (i << 3) + trailingZeros;
-                }
-            }
-            currentWord = 0;
-            byteIndex = byteLength;
-            return -1;
-        }
     }
 
     @Override
@@ -1333,5 +1305,33 @@ public class SingleThreadedDirectBitSet implements DirectBitSet {
         }
         sb.append("]}");
         return sb.toString();
+    }
+
+    private class SetBits implements Bits {
+        private final long byteLength = longLength << 3;
+        private long byteIndex = 0;
+        private long bitIndex = -1;
+        private long currentWord = bytes.readLong(0);
+
+        @Override
+        public long next() {
+            long l;
+            if ((l = currentWord) != 0) {
+                int trailingZeros = numberOfTrailingZeros(l);
+                currentWord = (l >>> trailingZeros) >>> 1;
+                return bitIndex += trailingZeros + 1;
+            }
+            for (long i = byteIndex, lim = byteLength; (i += 8) < lim; ) {
+                if ((l = bytes.readLong(i)) != 0) {
+                    byteIndex = i;
+                    int trailingZeros = numberOfTrailingZeros(l);
+                    currentWord = (l >>> trailingZeros) >>> 1;
+                    return bitIndex = (i << 3) + trailingZeros;
+                }
+            }
+            currentWord = 0;
+            byteIndex = byteLength;
+            return -1;
+        }
     }
 }

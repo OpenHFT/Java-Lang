@@ -1304,4 +1304,10 @@ public class CheckedBytes implements Bytes {
         this.checkNotClosed();
         return this.bytes.sliceAsByteBuffer(toReuse);
     }
+
+    @Override
+    public long nextSetBit(long fromIndex) {
+        this.checkNotClosed();
+        return this.bytes.nextSetBit(fromIndex);
+    }
 }
