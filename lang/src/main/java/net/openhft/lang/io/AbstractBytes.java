@@ -3229,7 +3229,6 @@ public abstract class AbstractBytes implements Bytes {
             }
             return utflen;
         }
-
     }
 
     private static final class FastStringOperations16 extends FastStringOperations17 {
@@ -3261,6 +3260,5 @@ public abstract class AbstractBytes implements Bytes {
             }
             return utflen;
         }
-
     }
 }
