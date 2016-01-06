@@ -66,12 +66,7 @@ public class NativeBytes extends AbstractBytes {
 
     public NativeBytes(long startAddr, long capacityAddr) {
         super();
-        setStartPositionAddress(startAddr);
-        if (startAddr > capacityAddr)
-            throw new IllegalArgumentException("Missorted capacity address");
-        this.limitAddr =
-                this.capacityAddr = capacityAddr;
-        positionChecks(positionAddr);
+        setStartAndCapacityAddress(startAddr, capacityAddr);
     }
 
     /**
@@ -138,6 +133,20 @@ public class NativeBytes extends AbstractBytes {
                 return (i << 3) + numberOfTrailingZeros(l);
         }
         return -1;
+    }
+
+    public static NativeBytes empty() {
+        return new NativeBytes(NO_PAGE, NO_PAGE);
+    }
+
+    public void setStartAndCapacityAddress(long startAddr, long capacityAddr) {
+        setStartPositionAddress(startAddr);
+        if (startAddr > capacityAddr)
+            throw new IllegalArgumentException("Mis-sorted capacity address");
+        this.limitAddr =
+                this.capacityAddr = capacityAddr;
+        positionChecks(positionAddr);
+
     }
 
     public void setStartPositionAddress(long startAddr) {
