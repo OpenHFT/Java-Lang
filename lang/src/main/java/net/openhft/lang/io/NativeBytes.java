@@ -23,12 +23,10 @@ import sun.misc.Unsafe;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Long.numberOfTrailingZeros;
@@ -46,8 +44,8 @@ public class NativeBytes extends AbstractBytes {
     protected static final long NO_PAGE;
     static final int BYTES_OFFSET;
     static final int CHARS_OFFSET;
-    static RandomAccessFile raf;
-    static ByteBuffer bb;
+//    static RandomAccessFile raf;
+//    static ByteBuffer bb;
 
     static {
         try {
@@ -63,7 +61,7 @@ public class NativeBytes extends AbstractBytes {
         NO_PAGE = UNSAFE.allocateMemory(UNSAFE.pageSize());
     }
 
-    static {
+/*    static {
         try {
             raf = new RandomAccessFile(System.getProperty("user.dir") + "/last_copy.dat", "rw");
             bb = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 16).order(ByteOrder.nativeOrder());
@@ -71,7 +69,7 @@ public class NativeBytes extends AbstractBytes {
             throw new AssertionError(e);
         }
 
-    }
+    }*/
 
     protected long startAddr;
     protected long positionAddr;
@@ -728,8 +726,8 @@ public class NativeBytes extends AbstractBytes {
         if (bytes instanceof NativeBytes) {
             long from = ((NativeBytes) bytes).startAddr + position;
             long to = this.positionAddr;
-            bb.putLong(0, from);
-            bb.putLong(8, to);
+//            bb.putLong(0, from);
+//            bb.putLong(8, to);
             UNSAFE.copyMemory(from, to, length);
             skip(length);
 
