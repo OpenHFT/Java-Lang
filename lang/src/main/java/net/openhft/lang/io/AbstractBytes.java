@@ -330,14 +330,25 @@ public abstract class AbstractBytes implements Bytes {
     }
 
     static void writeUTF1(DirectBytes bytes, @NotNull CharSequence str, int strlen) {
-        int c;
-        int i;
-        for (i = 0; i < strlen; i++) {
-            c = str.charAt(i);
-            if (!((c >= 0x0000) && (c <= 0x007F)))
+        int i = 0;
+        ascii:
+        {
+            for (; i < strlen - 3; i += 4) {
+                char c0 = str.charAt(i);
+                char c1 = str.charAt(i);
+                char c2 = str.charAt(i);
+                char c3 = str.charAt(i);
+                if ((c0 | c1 | c2 | c3) > 0x007F)
+                    break ascii;
+                NativeBytes.UNSAFE.putInt(bytes.positionAddr + i, c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
+            }
+            for (; i < strlen; i++) {
+                char c = str.charAt(i);
+                if (c > 0x007F)
 //            if (c + Integer.MIN_VALUE - 1 <= Integer.MIN_VALUE + 0x007F-1)
-                break;
-            NativeBytes.UNSAFE.putByte(bytes.positionAddr + i, (byte) c);
+                    break ascii;
+                NativeBytes.UNSAFE.putByte(bytes.positionAddr + i, (byte) c);
+            }
         }
         bytes.skip(i);
         if (i < strlen)
