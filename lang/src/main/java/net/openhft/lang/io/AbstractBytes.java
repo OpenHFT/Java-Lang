@@ -2184,7 +2184,7 @@ public abstract class AbstractBytes implements Bytes {
             return;
         }
         if (e instanceof Enum) {
-            write8bitText(e.toString());
+            write8bitText(e.name());
             return;
         }
 
