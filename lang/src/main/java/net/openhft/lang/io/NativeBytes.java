@@ -730,7 +730,6 @@ public class NativeBytes extends AbstractBytes {
             long to = this.positionAddr;
             bb.putLong(0, from);
             bb.putLong(8, to);
-            UNSAFE.fullFence();
             UNSAFE.copyMemory(from, to, length);
             skip(length);
 
