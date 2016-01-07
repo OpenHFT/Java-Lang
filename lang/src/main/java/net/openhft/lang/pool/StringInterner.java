@@ -45,6 +45,8 @@ public class StringInterner implements CharSequenceInterner<String> {
     @Override
     @NotNull
     public String intern(@NotNull CharSequence cs) {
+        if (cs.length() > interner.length)
+            return cs.toString();
         long hash = 0;
         for (int i = 0; i < cs.length(); i++)
             hash = 57 * hash + cs.charAt(i);
