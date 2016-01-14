@@ -29,6 +29,7 @@ public enum StringBuilderUtils {
     ;
 
     private static final Field SB_VALUE, SB_COUNT;
+    private static final long SB_COUNT_OFFSET;
 
     static {
         try {
@@ -36,6 +37,7 @@ public enum StringBuilderUtils {
             SB_VALUE.setAccessible(true);
             SB_COUNT = Class.forName("java.lang.AbstractStringBuilder").getDeclaredField("count");
             SB_COUNT.setAccessible(true);
+            SB_COUNT_OFFSET = NativeBytes.UNSAFE.objectFieldOffset(SB_COUNT);
         } catch (Exception e) {
             throw new AssertionError(e);
         }
@@ -75,10 +77,6 @@ public enum StringBuilderUtils {
     }
 
     public static void setCount(StringBuilder sb, int count) {
-        try {
-            SB_COUNT.setInt(sb, count);
-        } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
-        }
+        NativeBytes.UNSAFE.putInt(sb, SB_COUNT_OFFSET, count);
     }
 }

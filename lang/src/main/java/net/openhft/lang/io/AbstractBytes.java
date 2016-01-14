@@ -92,6 +92,7 @@ public abstract class AbstractBytes implements Bytes {
     private static final StringBuilderPool sbp = new StringBuilderPool();
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
     private static final FastStringOperations STRING_OPS = createFastStringOperations();
+    private static final StringInterner SI = new StringInterner(4096);
     private static boolean ID_LIMIT_WARNED = false;
 
     static {
@@ -108,7 +109,6 @@ public abstract class AbstractBytes implements Bytes {
     protected boolean finished;
     volatile Thread singleThread = null;
     private ObjectSerializer objectSerializer;
-    private StringInterner stringInterner = null;
     private boolean selfTerminating = false;
 
     AbstractBytes() {
@@ -330,14 +330,25 @@ public abstract class AbstractBytes implements Bytes {
     }
 
     static void writeUTF1(DirectBytes bytes, @NotNull CharSequence str, int strlen) {
-        int c;
-        int i;
-        for (i = 0; i < strlen; i++) {
-            c = str.charAt(i);
-            if (!((c >= 0x0000) && (c <= 0x007F)))
+        int i = 0;
+        ascii:
+        {
+            for (; i < strlen - 3; i += 4) {
+                char c0 = str.charAt(i);
+                char c1 = str.charAt(i + 1);
+                char c2 = str.charAt(i + 2);
+                char c3 = str.charAt(i + 3);
+                if ((c0 | c1 | c2 | c3) > 0x007F)
+                    break ascii;
+                NativeBytes.UNSAFE.putInt(bytes.positionAddr + i, c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
+            }
+            for (; i < strlen; i++) {
+                char c = str.charAt(i);
+                if (c > 0x007F)
 //            if (c + Integer.MIN_VALUE - 1 <= Integer.MIN_VALUE + 0x007F-1)
-                break;
-            NativeBytes.UNSAFE.putByte(bytes.positionAddr + i, (byte) c);
+                    break ascii;
+                NativeBytes.UNSAFE.putByte(bytes.positionAddr + i, (byte) c);
+            }
         }
         bytes.skip(i);
         if (i < strlen)
@@ -345,13 +356,12 @@ public abstract class AbstractBytes implements Bytes {
     }
 
     static void writeUTF1(DirectBytes bytes, @NotNull char[] chars, int strlen) {
-        int c;
         int i;
         ascii:
         {
             for (i = 0; i < strlen; i++) {
-                c = chars[i];
-                if (!((c >= 0x0000) && (c <= 0x007F)))
+                char c = chars[i];
+                if (c > 0x007F)
                     break ascii;
                 NativeBytes.UNSAFE.putByte(bytes.positionAddr + i, (byte) c);
             }
@@ -644,12 +654,6 @@ public abstract class AbstractBytes implements Bytes {
         return refCount.get();
     }
 
-    StringInterner stringInterner() {
-        if (stringInterner == null)
-            stringInterner = new StringInterner(8 * 1024);
-        return stringInterner;
-    }
-
     @Override
     public void selfTerminating(boolean selfTerminating) {
         this.selfTerminating = selfTerminating;
@@ -764,7 +768,7 @@ public abstract class AbstractBytes implements Bytes {
                     break;
             }
         }
-        return stringInterner().intern(input);
+        return SI.intern(input);
     }
 
     @Nullable
@@ -772,7 +776,7 @@ public abstract class AbstractBytes implements Bytes {
     public String readUTFΔ() {
         StringBuilder utfReader = acquireStringBuilder();
         if (readUTFΔ(utfReader))
-            return utfReader.length() == 0 ? "" : stringInterner().intern(utfReader);
+            return utfReader.length() == 0 ? "" : SI.intern(utfReader);
         return null;
     }
 
@@ -824,7 +828,7 @@ public abstract class AbstractBytes implements Bytes {
     public String parseUtf8(@NotNull StopCharTester tester) {
         StringBuilder utfReader = acquireStringBuilder();
         parseUtf8(utfReader, tester);
-        return stringInterner().intern(utfReader);
+        return SI.intern(utfReader);
     }
 
     @Override
@@ -934,7 +938,7 @@ public abstract class AbstractBytes implements Bytes {
             int len = readUnsignedShort();
             StringBuilder utfReader = acquireStringBuilder();
             readUTF0(utfReader, len);
-            return utfReader.length() == 0 ? "" : stringInterner().intern(utfReader);
+            return utfReader.length() == 0 ? "" : SI.intern(utfReader);
         } catch (IOException unexpected) {
             throw new AssertionError(unexpected);
         }
@@ -2184,7 +2188,7 @@ public abstract class AbstractBytes implements Bytes {
             return;
         }
         if (e instanceof Enum) {
-            write8bitText(e.toString());
+            write8bitText(((Enum) e).name());
             return;
         }
 
