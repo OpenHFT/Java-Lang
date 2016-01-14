@@ -64,8 +64,16 @@ public class NativeBytes extends AbstractBytes {
     protected long limitAddr;
     protected long capacityAddr;
 
+    public static NativeBytes empty() {
+        return new NativeBytes(NO_PAGE, NO_PAGE);
+    }
+
     public NativeBytes(long startAddr, long capacityAddr) {
         super();
+        setStartPositionAddress(startAddr, capacityAddr);
+    }
+
+    public void setStartPositionAddress(long startAddr, long capacityAddr) {
         setStartPositionAddress(startAddr);
         if (startAddr > capacityAddr)
             throw new IllegalArgumentException("Missorted capacity address");
