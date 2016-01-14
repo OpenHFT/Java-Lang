@@ -335,9 +335,9 @@ public abstract class AbstractBytes implements Bytes {
         {
             for (; i < strlen - 3; i += 4) {
                 char c0 = str.charAt(i);
-                char c1 = str.charAt(i);
-                char c2 = str.charAt(i);
-                char c3 = str.charAt(i);
+                char c1 = str.charAt(i + 1);
+                char c2 = str.charAt(i + 2);
+                char c3 = str.charAt(i + 3);
                 if ((c0 | c1 | c2 | c3) > 0x007F)
                     break ascii;
                 NativeBytes.UNSAFE.putInt(bytes.positionAddr + i, c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
