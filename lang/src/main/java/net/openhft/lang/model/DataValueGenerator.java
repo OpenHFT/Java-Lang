@@ -811,14 +811,14 @@ public class DataValueGenerator {
             // touch them to make sure they are loaded.
             Class clazz2 = acquireNativeClass(clazz);
         }
-        String actual = new DataValueGenerator().generateNativeObject(dvmodel);
-        if (dumpCode)
-            LoggerFactory.getLogger(DataValueGenerator.class).info(actual);
         ClassLoader classLoader = tClass.getClassLoader();
         String className = tClass.getName() + "$$Native";
         try {
             nativeClass = classLoader.loadClass(className);
         } catch (ClassNotFoundException ignored) {
+            String actual = new DataValueGenerator().generateNativeObject(dvmodel);
+            if (dumpCode)
+                LoggerFactory.getLogger(DataValueGenerator.class).info(actual);
             try {
                 nativeClass = CompilerUtils.CACHED_COMPILER.loadFromJava(classLoader, className, actual);
             } catch (ClassNotFoundException e) {
