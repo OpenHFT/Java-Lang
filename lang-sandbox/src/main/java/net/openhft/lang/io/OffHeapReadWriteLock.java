@@ -44,7 +44,7 @@ public class OffHeapReadWriteLock {
         return bytes.compareAndSwapLong(offset, lock0, lock2);
     }
 
-    static final String[] RW_MODES = {"none", "read", "write"};
+    private static final String[] RW_MODES = {"none", "read", "write"};
 
     public ReadLock readLock() {
         return readLock;

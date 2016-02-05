@@ -21,8 +21,8 @@ import java.nio.ByteBuffer;
 
 public class BigDecimalVsDoubleMain {
 
-    public static final String[] NUMBER = {"1000000", "1.1", "1.23456", "12345.67890"};
-    public static final Bytes[] IN_BYTES = new Bytes[NUMBER.length];
+    private static final String[] NUMBER = {"1000000", "1.1", "1.23456", "12345.67890"};
+    private static final Bytes[] IN_BYTES = new Bytes[NUMBER.length];
     public static final Bytes OUT_BYTES;
 
     static {
