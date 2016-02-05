@@ -46,7 +46,8 @@ public class LockingViaMMapWithThreadIdMain {
     public static void main(String... args) throws IOException, InterruptedException {
         boolean toggleTo = Boolean.parseBoolean(args[0]);
         File tmpFile = new File(System.getProperty("java.io.tmpdir"), "lock-test-tid.dat");
-        FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
+        RandomAccessFile randomAccessFile = new RandomAccessFile(tmpFile, "rw");
+        FileChannel fc = randomAccessFile.getChannel();
         MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, RECORDS * RECORD_SIZE);
         // set the the Thread.getId() to match the process thread id
         // this way the getId() can be used across processes..
@@ -97,6 +98,7 @@ public class LockingViaMMapWithThreadIdMain {
         System.out.printf("Toggled %,d times with an average delay of %,d ns%n",
                 toggles, time / toggles);
         fc.close();
+        randomAccessFile.close();
         tmpFile.deleteOnExit();
     }
 }

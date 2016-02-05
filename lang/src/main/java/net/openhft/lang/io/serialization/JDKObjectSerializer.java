@@ -28,11 +28,16 @@ public enum JDKObjectSerializer implements ObjectSerializer {
 
     @Override
     public void writeSerializable(Bytes bytes, Object object, Class expectedClass) throws IOException {
-        new ObjectOutputStream(bytes.outputStream()).writeObject(object);
+        ObjectOutputStream oos= new ObjectOutputStream(bytes.outputStream());
+        oos.writeObject(object);
+        oos.close();
     }
 
     @Override
     public <T> T readSerializable(@NotNull Bytes bytes, Class<T> expectedClass, T object) throws IOException, ClassNotFoundException {
-        return (T) new ObjectInputStream(bytes.inputStream()).readObject();
+        ObjectInputStream ois = new ObjectInputStream(bytes.inputStream());
+        T obj = (T) ois.readObject();
+        ois.close();
+        return obj;
     }
 }

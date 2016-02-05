@@ -134,10 +134,15 @@ public enum Jvm {
         if (isLinux()) {
             File file = new File("/proc/sys/kernel/pid_max");
             if (file.canRead()) {
-                try {
-                    return Maths.nextPower2(new Scanner(file).nextLong(), 1);
+                Scanner scanner = null;
+                try{
+                    scanner = new Scanner(file); 
+                    return Maths.nextPower2(.nextLong(), 1);
                 } catch (FileNotFoundException e) {
                     LoggerHolder.LOGGER.log(Level.WARNING, "", e);
+                }finally {
+                    if(scanner != null)
+                        scanner.close();
                 }
             }
         } else if (isMacOSX()) {

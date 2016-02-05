@@ -89,7 +89,14 @@ public enum ByteBufferZMarshaller implements CompactBytesMarshaller<ByteBuffer> 
                 byteBuffer.put(dis.readByte());
         } catch (IOException e) {
             throw new IllegalStateException(e);
+        } finally {
+            try {
+                dis.close();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
+        
         bytes.position(end);
         bytes.limit(limit);
 
