@@ -111,6 +111,7 @@ public enum StringZMapMarshaller implements CompactBytesMarshaller<Map<String, S
                 String value = dis.readUTF();
                 kvMap.put(key, value);
             }
+            dis.close();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
