@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -34,9 +33,11 @@ import java.util.logging.Logger;
 public enum Jvm {
     ;
 
-    public static String TMP = System.getProperty("java.io.tmpdir");
-
     private static final boolean IS64BIT = is64Bit0();
+    private static final int PROCESS_ID = getProcessId0();
+    private static final String OS = System.getProperty("os.name").toLowerCase();
+    public static final int PID_BITS = Maths.intLog2(getPidMax());
+    public static String TMP = System.getProperty("java.io.tmpdir");
 
     public static boolean is64Bit() {
         return IS64BIT;
@@ -55,8 +56,6 @@ public enum Jvm {
         systemProp = System.getProperty("java.vm.version");
         return systemProp != null && systemProp.contains("_64");
     }
-
-    private static final int PROCESS_ID = getProcessId0();
 
     public static int getProcessId() {
         return PROCESS_ID;
@@ -101,10 +100,12 @@ public enum Jvm {
         return ((long) getProcessId() << 24) | thread.getId();
     }
 
-    private static final String OS = System.getProperty("os.name").toLowerCase();
-
     public static boolean isWindows() {
         return OS.startsWith("win");
+    }
+
+    public static boolean isWindows10() {
+        return OS.startsWith("win") && OS.endsWith("10");
     }
 
     public static boolean isMacOSX() {
@@ -128,16 +129,14 @@ public enum Jvm {
         return OS.startsWith("sun");
     }
 
-    public static final int PID_BITS = Maths.intLog2(getPidMax());
-
     public static long getPidMax() {
         if (isLinux()) {
             File file = new File("/proc/sys/kernel/pid_max");
             if (file.canRead()) {
                 Scanner scanner = null;
                 try{
-                    scanner = new Scanner(file); 
-                    return Maths.nextPower2(.nextLong(), 1);
+                    scanner = new Scanner(file);
+                    return Maths.nextPower2(scanner.nextLong(), 1 << 16);
                 } catch (FileNotFoundException e) {
                     LoggerHolder.LOGGER.log(Level.WARNING, "", e);
                 }finally {
@@ -150,7 +149,7 @@ public enum Jvm {
         }
 
         // the default.
-        return 1L << 16;
+        return isWindows10() ? 1L << 24 : 1L << 16;
     }
 
     private static String convertStreamToString(java.io.InputStream is) {
@@ -208,10 +207,6 @@ public enum Jvm {
         throw new AssertionError();
     }
 
-    static class LoggerHolder {
-        public static final Logger LOGGER = Logger.getLogger(Jvm.class.getName());
-    }
-
     public static void trimStackTrace(StringBuilder sb, StackTraceElement... stes) {
         int first = trimFirst(stes);
         int last = trimLast(first, stes);
@@ -240,6 +235,10 @@ public enum Jvm {
 
     public static boolean isInternal(String className) {
         return className.startsWith("jdk.") || className.startsWith("sun.") || className.startsWith("java.");
+    }
+
+    static class LoggerHolder {
+        public static final Logger LOGGER = Logger.getLogger(Jvm.class.getName());
     }
 
 }
