@@ -2589,7 +2589,7 @@ public abstract class AbstractBytes implements Bytes {
                     }
                     return true;
                 }
-                Jvm.pause(1);
+                Thread.sleep(1);
             } while (end > System.nanoTime());
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();

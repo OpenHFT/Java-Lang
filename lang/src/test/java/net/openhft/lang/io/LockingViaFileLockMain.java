@@ -64,7 +64,7 @@ public class LockingViaFileLockMain {
                         } else {
                             System.out.println("waiting");
                             t = 99999;
-                            Jvm.pause(200);
+                            Thread.sleep(200);
                         }
                     final FileLock lock = fc.lock();
                     try {
