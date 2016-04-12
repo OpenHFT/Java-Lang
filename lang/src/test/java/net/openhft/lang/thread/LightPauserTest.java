@@ -41,7 +41,7 @@ public class LightPauserTest {
                 pauser.unpause();
             long time = System.nanoTime() - start;
             System.out.printf("Average time to unpark was %,d ns%n", time / runs);
-            Thread.sleep(20);
+            Jvm.pause(20);
         }
         thread.interrupt();
     }

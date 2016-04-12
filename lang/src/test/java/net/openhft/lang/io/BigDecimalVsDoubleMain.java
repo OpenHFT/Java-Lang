@@ -57,17 +57,17 @@ public class BigDecimalVsDoubleMain {
                 if (count >= NUMBER.length) count = 0;
 
                 if (t > 0)
-                    Thread.sleep(1);
+                    Jvm.pause(1);
                 timeB += testDoubleWithBytes();
                 timeBD += testBigDecimalWithString();
                 timeD += testDoubleWithString();
                 if (t > 0)
-                    Thread.sleep(1);
+                    Jvm.pause(1);
                 timeD += testDoubleWithString();
                 timeB += testDoubleWithBytes();
                 timeBD += testBigDecimalWithString();
                 if (t > 0)
-                    Thread.sleep(1);
+                    Jvm.pause(1);
                 timeBD += testBigDecimalWithString();
                 timeD += testDoubleWithString();
                 timeB += testDoubleWithBytes();

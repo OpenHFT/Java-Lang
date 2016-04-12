@@ -69,7 +69,7 @@ public class MappedFile {
                 }
                 try {
                     //noinspection BusyWait
-                    Thread.sleep(1);
+                    Jvm.pause(1);
                 } catch (InterruptedException ignored) {
                     Thread.currentThread().interrupt();
                     throw e;

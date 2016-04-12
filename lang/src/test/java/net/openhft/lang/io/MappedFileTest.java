@@ -82,7 +82,7 @@ public class MappedFileTest {
             System.out.println("Freed " + free0 + " ~ " + free1 + " ~ " + free2 + " ~ " + free3 + ", delete = " + file.delete());
             if (free3 > free1)
                 break;
-            Thread.sleep(500);
+            Jvm.pause(500);
         }
         assertTrue("free3-free1: " + (free3 - free1), free3 > free1);
     }

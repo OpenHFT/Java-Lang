@@ -62,7 +62,7 @@ public class LockingViaMMapMain {
                             throw new AssertionError("Didn't toggle in time !??");
 
                         } else {
-                            Thread.sleep(200);
+                            Jvm.pause(200);
                         }
                     bytes.busyLockLong(recordOffset + LOCK);
                     try {
@@ -80,7 +80,7 @@ public class LockingViaMMapMain {
                                 + " is " + bytes.readBoolean(recordOffset + FLAG));
                     if (t > 100)
                         if (t > 200)
-                            Thread.sleep(1);
+                            Jvm.pause(1);
                         else
                             Thread.yield();
                 }
