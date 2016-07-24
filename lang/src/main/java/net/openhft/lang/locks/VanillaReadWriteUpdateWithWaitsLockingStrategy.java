@@ -1,17 +1,17 @@
 /*
- *     Copyright (C) 2015  higherfrequencytrading.com
+ * Copyright 2016 higherfrequencytrading.com
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Lesser General Public License as published by
- *     the Free Software Foundation, either version 3 of the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Lesser General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *     You should have received a copy of the GNU Lesser General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package net.openhft.lang.locks;
@@ -24,31 +24,27 @@ public final class VanillaReadWriteUpdateWithWaitsLockingStrategy
         extends AbstractReadWriteLockingStrategy
         implements ReadWriteUpdateWithWaitsLockingStrategy {
 
-    private static final ReadWriteUpdateWithWaitsLockingStrategy INSTANCE =
-            new VanillaReadWriteUpdateWithWaitsLockingStrategy();
-
-    public static ReadWriteUpdateWithWaitsLockingStrategy instance() {
-        return INSTANCE;
-    }
-
-    private VanillaReadWriteUpdateWithWaitsLockingStrategy() {}
-
     static final long COUNT_WORD_OFFSET = 0L;
     static final long WAIT_WORD_OFFSET = COUNT_WORD_OFFSET + 4L;
-
     static final int COUNT_WORD_SHIFT = nativeOrder() == LITTLE_ENDIAN ? 0 : 32;
     static final int WAIT_WORD_SHIFT = nativeOrder() == LITTLE_ENDIAN ? 32 : 0;
-
     static final int READ_BITS = 30;
     static final int MAX_READ = (1 << READ_BITS) - 1;
     static final int READ_MASK = MAX_READ;
     static final int READ_PARTY = 1;
-
     static final int UPDATE_PARTY = 1 << READ_BITS;
     static final int WRITE_LOCKED_COUNT_WORD = UPDATE_PARTY << 1;
-
     static final int MAX_WAIT = Integer.MAX_VALUE;
     static final int WAIT_PARTY = 1;
+    private static final ReadWriteUpdateWithWaitsLockingStrategy INSTANCE =
+            new VanillaReadWriteUpdateWithWaitsLockingStrategy();
+
+    private VanillaReadWriteUpdateWithWaitsLockingStrategy() {
+    }
+
+    public static ReadWriteUpdateWithWaitsLockingStrategy instance() {
+        return INSTANCE;
+    }
 
     private static <T> long getLockWord(NativeAtomicAccess<T> access, T t, long offset) {
         return access.getLongVolatile(t, offset);
@@ -143,6 +139,25 @@ public final class VanillaReadWriteUpdateWithWaitsLockingStrategy
         }
     }
 
+    private static <T> boolean tryWriteLockAndDeregisterWait0(
+            NativeAtomicAccess<T> access, T t, long offset, long lockWord) {
+        int waitWord = waitWord(lockWord);
+        checkWaitWordForDecrement(waitWord);
+        return casLockWord(access, t, offset, lockWord,
+                lockWord(WRITE_LOCKED_COUNT_WORD, waitWord - WAIT_PARTY));
+    }
+
+    private static boolean checkExclusiveUpdateLocked(int countWord) {
+        checkUpdateLocked(countWord);
+        return countWord == UPDATE_PARTY;
+    }
+
+    private static <T> void checkWriteLockedAndPut(
+            NativeAtomicAccess<T> access, T t, long offset, int countWord) {
+        checkWriteLocked(getCountWord(access, t, offset));
+        putCountWord(access, t, offset, countWord);
+    }
+
     @Override
     public long resetState() {
         return 0L;
@@ -194,14 +209,6 @@ public final class VanillaReadWriteUpdateWithWaitsLockingStrategy
         checkReadLocked(countWord);
         return countWord == READ_PARTY &&
                 tryWriteLockAndDeregisterWait0(access, t, offset, lockWord);
-    }
-
-    private static <T> boolean tryWriteLockAndDeregisterWait0(
-            NativeAtomicAccess<T> access, T t, long offset, long lockWord) {
-        int waitWord = waitWord(lockWord);
-        checkWaitWordForDecrement(waitWord);
-        return casLockWord(access, t, offset, lockWord,
-                lockWord(WRITE_LOCKED_COUNT_WORD, waitWord - WAIT_PARTY));
     }
 
     @Override
@@ -256,11 +263,6 @@ public final class VanillaReadWriteUpdateWithWaitsLockingStrategy
                 casCountWord(access, t, offset, countWord, WRITE_LOCKED_COUNT_WORD);
     }
 
-    private static boolean checkExclusiveUpdateLocked(int countWord) {
-        checkUpdateLocked(countWord);
-        return countWord == UPDATE_PARTY;
-    }
-
     @Override
     public <T> boolean tryUpgradeUpdateToWriteLockAndDeregisterWait(
             NativeAtomicAccess<T> access, T t, long offset) {
@@ -306,12 +308,6 @@ public final class VanillaReadWriteUpdateWithWaitsLockingStrategy
     @Override
     public <T> void writeUnlock(NativeAtomicAccess<T> access, T t, long offset) {
         checkWriteLockedAndPut(access, t, offset, 0);
-    }
-
-    private static <T> void checkWriteLockedAndPut(
-            NativeAtomicAccess<T> access, T t, long offset, int countWord) {
-        checkWriteLocked(getCountWord(access, t, offset));
-        putCountWord(access, t, offset, countWord);
     }
 
     @Override

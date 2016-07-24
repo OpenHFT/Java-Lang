@@ -1,17 +1,17 @@
 /*
- *     Copyright (C) 2015  higherfrequencytrading.com
+ * Copyright 2016 higherfrequencytrading.com
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Lesser General Public License as published by
- *     the Free Software Foundation, either version 3 of the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Lesser General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *     You should have received a copy of the GNU Lesser General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package net.openhft.lang.io.serialization.impl;
@@ -30,13 +30,13 @@ import java.util.Map;
  */
 public class EnumBytesMarshaller<E extends Enum<E>> extends ImmutableMarshaller<E>
         implements BytesMarshaller<E> {
+    private static final StringBuilderPool sbp = new StringBuilderPool();
     @SuppressWarnings("unchecked")
     private final E[] interner = (E[]) new Enum[1024];
     private final BitSet internerDup = new BitSet(1024);
     private final Map<String, E> map = new LinkedHashMap<String, E>(64);
     private final E defaultValue;
     private final int mask;
-    private static final StringBuilderPool sbp = new StringBuilderPool();
 
     public EnumBytesMarshaller(@NotNull Class<E> classMarshaled, E defaultValue) {
         this.defaultValue = defaultValue;

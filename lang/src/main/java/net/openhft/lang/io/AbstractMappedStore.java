@@ -1,19 +1,24 @@
 /*
- *     Copyright (C) 2015  higherfrequencytrading.com
+ * Copyright 2016 higherfrequencytrading.com
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Lesser General Public License as published by
- *     the Free Software Foundation, either version 3 of the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Lesser General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *     You should have received a copy of the GNU Lesser General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package net.openhft.lang.io;
+
+import net.openhft.lang.io.serialization.ObjectSerializer;
+import net.openhft.lang.model.constraints.NotNull;
+import sun.misc.Cleaner;
+import sun.nio.ch.FileChannelImpl;
 
 import java.io.Closeable;
 import java.io.File;
@@ -26,23 +31,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.openhft.lang.io.serialization.ObjectSerializer;
-import net.openhft.lang.model.constraints.NotNull;
-import sun.misc.Cleaner;
-import sun.nio.ch.FileChannelImpl;
-
 abstract class AbstractMappedStore implements BytesStore, Closeable {
     private static final int MAP_RO = 0;
     private static final int MAP_RW = 1;
     private static final int MAP_PV = 2;
-
+    protected final MmapInfoHolder mmapInfoHolder;
     // retain to prevent GC.
     private final File file;
     private final RandomAccessFile raf;
     private final Cleaner cleaner;
     private final AtomicInteger refCount = new AtomicInteger(1);
     private final FileChannel.MapMode mode;
-    protected final MmapInfoHolder mmapInfoHolder;
     private ObjectSerializer objectSerializer;
 
     AbstractMappedStore(MmapInfoHolder mmapInfoHolder, File file, FileChannel.MapMode mode,
@@ -69,48 +68,6 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
         if (size <= 0 || size > 128L << 40) {
             throw new IllegalArgumentException("invalid size: " + size);
         }
-    }
-
-    protected final void resizeIfNeeded(long startInFile, long newSize) throws IOException {
-        if (file.getAbsolutePath().startsWith("/dev/")) {
-            return;
-        }
-        if (startInFile > 0) {
-            if (raf.length() >= startInFile + newSize) {
-                return;
-            }
-        } else if (startInFile == 0) {
-            if (raf.length() == newSize) {
-                return;
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "Start offset in file needs to be positive: " + startInFile);
-        }
-        if (mode != FileChannel.MapMode.READ_WRITE) {
-            throw new IOException(
-                    "Cannot resize file to " + newSize + " as mode is not READ_WRITE");
-        }
-
-        raf.setLength(startInFile + newSize);
-    }
-
-    protected final void map(long startInFile) throws IOException {
-        try {
-            mmapInfoHolder.setAddress(
-                    map0(raf.getChannel(), imodeFor(mode), startInFile, mmapInfoHolder.getSize()));
-        } catch (Exception e) {
-            throw wrap(e);
-        }
-    }
-
-    protected final void unmapAndSyncToDisk() throws IOException {
-        unmap0(mmapInfoHolder.getAddress(), mmapInfoHolder.getSize());
-        syncToDisk();
-    }
-
-    public final void syncToDisk() throws IOException {
-        raf.getChannel().force(true);
     }
 
     private static long map0(FileChannel fileChannel, int imode, long start, long size)
@@ -154,6 +111,48 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
             imode = MAP_PV;
         assert (imode >= 0);
         return imode;
+    }
+
+    protected final void resizeIfNeeded(long startInFile, long newSize) throws IOException {
+        if (file.getAbsolutePath().startsWith("/dev/")) {
+            return;
+        }
+        if (startInFile > 0) {
+            if (raf.length() >= startInFile + newSize) {
+                return;
+            }
+        } else if (startInFile == 0) {
+            if (raf.length() == newSize) {
+                return;
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "Start offset in file needs to be positive: " + startInFile);
+        }
+        if (mode != FileChannel.MapMode.READ_WRITE) {
+            throw new IOException(
+                    "Cannot resize file to " + newSize + " as mode is not READ_WRITE");
+        }
+
+        raf.setLength(startInFile + newSize);
+    }
+
+    protected final void map(long startInFile) throws IOException {
+        try {
+            mmapInfoHolder.setAddress(
+                    map0(raf.getChannel(), imodeFor(mode), startInFile, mmapInfoHolder.getSize()));
+        } catch (Exception e) {
+            throw wrap(e);
+        }
+    }
+
+    protected final void unmapAndSyncToDisk() throws IOException {
+        unmap0(mmapInfoHolder.getAddress(), mmapInfoHolder.getSize());
+        syncToDisk();
+    }
+
+    public final void syncToDisk() throws IOException {
+        raf.getChannel().force(true);
     }
 
     @Override
@@ -209,22 +208,22 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
             this.locked = true;
         }
 
+        long getAddress() {
+            return address;
+        }
+
         void setAddress(long address) {
             checkLock();
             this.address = address;
         }
 
-        long getAddress() {
-            return address;
+        long getSize() {
+            return size;
         }
 
         void setSize(long size) {
             checkLock();
             this.size = size;
-        }
-
-        long getSize() {
-            return size;
         }
     }
 
