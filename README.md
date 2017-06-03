@@ -53,7 +53,7 @@ Both classes provide functionality:
 * CAS operations for int and long _boolean compareAndSwapInt(long offset, int expected, int x)_, _boolean compareAndSwapLong(long offset, long expected, long x)_
 * addAndGetInt and getAndAddInt operations
 
-####Example
+#### Example
     ByteBuffer byteBuffer = ByteBuffer.allocate(SIZE);
     ByteBufferBytes bytes = new ByteBufferBytes(byteBuffer);
     for (long i = 0; i < bytes.maximumLimit(); i++)
@@ -63,7 +63,7 @@ Both classes provide functionality:
         assert i ==  j;
     }
 
-#Building for eclipse
+# Building for eclipse
 
 Download Java-Lang zip from git https://github.com/OpenHFT/Java-Lang/archive/master.zip
 
