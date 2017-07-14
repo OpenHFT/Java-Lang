@@ -63,7 +63,6 @@ public enum JDKZObjectSerializer implements ObjectSerializer {
         T t = (T) new ObjectInputStream(in).readObject();
         bytes.limit(lim);
         if (end != bytes.position()) {
-            System.out.println("diff: " + (end - bytes.position()));
             bytes.position(end);
         }
         return t;
