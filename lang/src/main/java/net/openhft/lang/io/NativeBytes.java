@@ -44,7 +44,7 @@ public class NativeBytes extends AbstractBytes {
     protected static final long NO_PAGE;
     static final int BYTES_OFFSET;
     static final int CHARS_OFFSET;
-
+    
     static {
         try {
             @SuppressWarnings("ALL")
@@ -355,39 +355,49 @@ public class NativeBytes extends AbstractBytes {
 
     @Override
     public short readShort() {
-        short s = UNSAFE.getShort(positionAddr);
+        //short s = UNSAFE.getShort(positionAddr);
+        short s = Bits.getShort(positionAddr);
+
         addPosition(2);
         return s;
     }
 
     @Override
     public short readShort(long offset) {
-        return UNSAFE.getShort(startAddr + offset);
+        //return UNSAFE.getShort(startAddr + offset);
+        return Bits.getShort(startAddr + offset);
     }
 
     @Override
     public char readChar() {
-        char ch = UNSAFE.getChar(positionAddr);
+        //char ch = UNSAFE.getChar(positionAddr);
+        char ch = Bits.getChar(positionAddr);
+        
         addPosition(2);
         return ch;
     }
 
     @Override
     public char readChar(long offset) {
-        return UNSAFE.getChar(startAddr + offset);
+        //return UNSAFE.getChar(startAddr + offset);
+        return Bits.getChar(startAddr + offset);
+     
     }
 
     @Override
     public int readInt() {
-        int i = UNSAFE.getInt(positionAddr);
+        //int i = UNSAFE.getInt(positionAddr);
+        int i = Bits.getInt(positionAddr);
+
         addPosition(4);
         return i;
     }
 
     @Override
     public int readInt(long offset) {
-        return UNSAFE.getInt(startAddr + offset);
-    }
+        //return UNSAFE.getInt(startAddr + offset);
+        return Bits.getInt(startAddr + offset);
+}
 
     @Override
     public int readVolatileInt() {
@@ -403,14 +413,18 @@ public class NativeBytes extends AbstractBytes {
 
     @Override
     public long readLong() {
-        long l = UNSAFE.getLong(positionAddr);
+        //long l = UNSAFE.getLong(positionAddr);
+        long l = Bits.getLong(positionAddr);
+
         addPosition(8);
         return l;
     }
 
     @Override
     public long readLong(long offset) {
-        return UNSAFE.getLong(startAddr + offset);
+        //return UNSAFE.getLong(startAddr + offset);
+        return Bits.getLong(startAddr + offset);
+
     }
 
     @Override
@@ -427,26 +441,32 @@ public class NativeBytes extends AbstractBytes {
 
     @Override
     public float readFloat() {
-        float f = UNSAFE.getFloat(positionAddr);
+        //float f = UNSAFE.getFloat(positionAddr);
+        float f = Bits.getFloat(positionAddr);
+
         addPosition(4);
         return f;
     }
 
     @Override
     public float readFloat(long offset) {
-        return UNSAFE.getFloat(startAddr + offset);
+        //return UNSAFE.getFloat(startAddr + offset);
+        return Bits.getFloat(startAddr + offset);
     }
 
     @Override
     public double readDouble() {
-        double d = UNSAFE.getDouble(positionAddr);
+        //double d = UNSAFE.getDouble(positionAddr);
+        double d = Bits.getDouble(positionAddr);
+
         addPosition(8);
         return d;
     }
 
     @Override
     public double readDouble(long offset) {
-        return UNSAFE.getDouble(startAddr + offset);
+        //return UNSAFE.getDouble(startAddr + offset);
+        return Bits.getDouble(startAddr + offset);
     }
 
     @Override
@@ -487,7 +507,9 @@ public class NativeBytes extends AbstractBytes {
     @Override
     public void writeShort(int v) {
         positionChecks(positionAddr + 2L);
-        UNSAFE.putShort(positionAddr, (short) v);
+        //UNSAFE.putShort(positionAddr, (short) v);
+        Bits.putShort(positionAddr, (short) v);
+        
         positionAddr += 2L;
     }
 
@@ -499,13 +521,16 @@ public class NativeBytes extends AbstractBytes {
     @Override
     public void writeShort(long offset, int v) {
         offsetChecks(offset, 2L);
-        UNSAFE.putShort(startAddr + offset, (short) v);
+        //UNSAFE.putShort(startAddr + offset, (short) v);
+        Bits.putShort(startAddr + offset, (short) v);
     }
 
     @Override
     public void writeChar(int v) {
         positionChecks(positionAddr + 2L);
-        UNSAFE.putChar(positionAddr, (char) v);
+        //UNSAFE.putChar(positionAddr, (char) v);
+        Bits.putChar(positionAddr, (char) v);
+          
         positionAddr += 2L;
     }
 
@@ -516,20 +541,24 @@ public class NativeBytes extends AbstractBytes {
     @Override
     public void writeChar(long offset, int v) {
         offsetChecks(offset, 2L);
-        UNSAFE.putChar(startAddr + offset, (char) v);
+        //UNSAFE.putChar(startAddr + offset, (char) v);
+        Bits.putChar(startAddr + offset, (char) v);
     }
 
     @Override
     public void writeInt(int v) {
         positionChecks(positionAddr + 4L);
-        UNSAFE.putInt(positionAddr, v);
+        //UNSAFE.putInt(positionAddr, v);
+        Bits.putInt(positionAddr, v);
+         
         positionAddr += 4L;
     }
 
     @Override
     public void writeInt(long offset, int v) {
         offsetChecks(offset, 4L);
-        UNSAFE.putInt(startAddr + offset, v);
+        //UNSAFE.putInt(startAddr + offset, v);
+        Bits.putInt(startAddr + offset, v);
     }
 
     @Override
@@ -554,14 +583,17 @@ public class NativeBytes extends AbstractBytes {
     @Override
     public void writeLong(long v) {
         positionChecks(positionAddr + 8L);
-        UNSAFE.putLong(positionAddr, v);
+        //UNSAFE.putLong(positionAddr, v);
+        Bits.putLong(positionAddr, v);
+
         positionAddr += 8L;
     }
 
     @Override
     public void writeLong(long offset, long v) {
         offsetChecks(offset, 8L);
-        UNSAFE.putLong(startAddr + offset, v);
+        //UNSAFE.putLong(startAddr + offset, v);
+        Bits.putLong(startAddr + offset, v);
     }
 
     @Override
@@ -586,27 +618,31 @@ public class NativeBytes extends AbstractBytes {
     @Override
     public void writeFloat(float v) {
         positionChecks(positionAddr + 4L);
-        UNSAFE.putFloat(positionAddr, v);
+        //UNSAFE.putFloat(positionAddr, v);
+        Bits.putFloat(positionAddr, v);
         positionAddr += 4L;
     }
 
     @Override
     public void writeFloat(long offset, float v) {
         offsetChecks(offset, 4L);
-        UNSAFE.putFloat(startAddr + offset, v);
+       // UNSAFE.putFloat(startAddr + offset, v);
+        Bits.putFloat(startAddr + offset, Float.floatToIntBits(v));
     }
 
     @Override
     public void writeDouble(double v) {
         positionChecks(positionAddr + 8L);
-        UNSAFE.putDouble(positionAddr, v);
+        //UNSAFE.putDouble(positionAddr, v);
+        Bits.putDouble(positionAddr, v);
         positionAddr += 8L;
     }
 
     @Override
     public void writeDouble(long offset, double v) {
         offsetChecks(offset, 8L);
-        UNSAFE.putDouble(startAddr + offset, v);
+        //UNSAFE.putDouble(startAddr + offset, v);
+        Bits.putDouble(startAddr + offset, Double.doubleToLongBits(v));
     }
 
     @Override
@@ -855,4 +891,7 @@ public class NativeBytes extends AbstractBytes {
             return nextSetBit0((int) firstByte, (int) capacity, startAddr);
         return nextSetBit0(firstByte, capacity, startAddr);
     }
+    
+
+      
 }
