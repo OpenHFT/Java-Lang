@@ -627,7 +627,7 @@ public class NativeBytes extends AbstractBytes {
     public void writeFloat(long offset, float v) {
         offsetChecks(offset, 4L);
        // UNSAFE.putFloat(startAddr + offset, v);
-        Bits.putFloat(startAddr + offset, Float.floatToIntBits(v));
+        Bits.putFloat(startAddr + offset, v);
     }
 
     @Override
@@ -642,7 +642,7 @@ public class NativeBytes extends AbstractBytes {
     public void writeDouble(long offset, double v) {
         offsetChecks(offset, 8L);
         //UNSAFE.putDouble(startAddr + offset, v);
-        Bits.putDouble(startAddr + offset, Double.doubleToLongBits(v));
+        Bits.putDouble(startAddr + offset, v);
     }
 
     @Override
