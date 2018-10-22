@@ -49,7 +49,8 @@ public class BytesOutputStream extends OutputStream {
      * method must be called before first actual use of the constructed {@code BytesOutputStream}
      * instance.
      */
-    public BytesOutputStream() {}
+    public BytesOutputStream() {
+    }
 
     /**
      * Reassigns the underlying {@code Bytes} of this output stream.

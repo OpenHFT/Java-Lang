@@ -48,7 +48,7 @@ public final class AcquisitionStrategies {
 
         @Override
         public <T> boolean acquire(TryAcquireOperation<? super S> operation, S strategy,
-                NativeAtomicAccess<T> access, T t, long offset) {
+                                   NativeAtomicAccess<T> access, T t, long offset) {
             if (operation.tryAcquire(strategy, access, t, offset))
                 return true;
             long deadLine = System.currentTimeMillis() + durationNanos;

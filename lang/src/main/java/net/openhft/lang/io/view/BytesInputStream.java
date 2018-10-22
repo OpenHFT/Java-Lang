@@ -52,7 +52,8 @@ public class BytesInputStream extends InputStream {
      * method must be called before first actual use of the constructed {@code BytesInputStream}
      * instance.
      */
-    public BytesInputStream() {}
+    public BytesInputStream() {
+    }
 
     /**
      * Reassigns the underlying {@code Bytes} of this input stream.

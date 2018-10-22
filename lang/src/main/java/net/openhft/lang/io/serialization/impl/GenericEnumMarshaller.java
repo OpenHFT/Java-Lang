@@ -39,7 +39,7 @@ public class GenericEnumMarshaller<E> implements BytesMarshaller<E> {
     private final Map<String, E> map;
 
     //used by the read resolve method
-    private  final Class<E> classMarshaled;
+    private final Class<E> classMarshaled;
 
     public GenericEnumMarshaller(@NotNull Class<E> classMarshaled, final int capacity) {
         this.classMarshaled = classMarshaled;

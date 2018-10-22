@@ -21,9 +21,8 @@ import java.nio.channels.FileChannel;
  * Helper wrapper for mapeed access mode
  */
 public enum VanillaMappedMode {
-    RO("r" ,0, FileChannel.MapMode.READ_ONLY),
-    RW("rw",1,FileChannel.MapMode.READ_WRITE)
-    ;
+    RO("r", 0, FileChannel.MapMode.READ_ONLY),
+    RW("rw", 1, FileChannel.MapMode.READ_WRITE);
 
     private static final VanillaMappedMode[] VALUES = values();
 
@@ -42,8 +41,8 @@ public enum VanillaMappedMode {
     }
 
     public static VanillaMappedMode fromValue(int value) {
-        for(VanillaMappedMode mode : VALUES) {
-            if(mode.intValue() == value) {
+        for (VanillaMappedMode mode : VALUES) {
+            if (mode.intValue() == value) {
                 return mode;
             }
         }
@@ -52,8 +51,8 @@ public enum VanillaMappedMode {
     }
 
     public static VanillaMappedMode fromValue(String value) {
-        for(VanillaMappedMode mode : VALUES) {
-            if(mode.stringValue().equalsIgnoreCase(value)) {
+        for (VanillaMappedMode mode : VALUES) {
+            if (mode.stringValue().equalsIgnoreCase(value)) {
                 return mode;
             }
         }
@@ -62,8 +61,8 @@ public enum VanillaMappedMode {
     }
 
     public static VanillaMappedMode fromValue(FileChannel.MapMode value) {
-        for(VanillaMappedMode mode : VALUES) {
-            if(mode.mapValue() == value) {
+        for (VanillaMappedMode mode : VALUES) {
+            if (mode.mapValue() == value) {
                 return mode;
             }
         }

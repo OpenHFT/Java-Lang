@@ -51,12 +51,12 @@ public class DirectByteBufferBytes extends NativeBytes implements IByteBufferByt
     }
 
     protected DirectByteBufferBytes resize(int newCapacity, boolean cleanup, boolean preserveData) {
-        if(newCapacity != capacity()) {
+        if (newCapacity != capacity()) {
             final ByteBuffer oldBuffer = this.buffer;
             final long oldAddress = this.startAddr;
             final long oldPosition = position();
 
-            if(preserveData && (oldPosition > newCapacity)) {
+            if (preserveData && (oldPosition > newCapacity)) {
                 throw new IllegalArgumentException(
                         "Capacity can't be less than currently used data (size=" + oldPosition
                                 + ", capacity=" + newCapacity + ")"
@@ -73,7 +73,7 @@ public class DirectByteBufferBytes extends NativeBytes implements IByteBufferByt
                 this.positionAddr = this.startAddr + Math.min(newCapacity, oldPosition);
             }
 
-            if(cleanup) {
+            if (cleanup) {
                 IOTools.clean(oldBuffer);
             }
         }

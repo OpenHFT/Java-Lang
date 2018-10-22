@@ -60,8 +60,8 @@ public class VanillaMappedBytes extends NativeBytes {
             final FileLifecycleListener fileLifecycleListener) {
 
         super(
-            buffer.capacity() == 0 ? NO_PAGE : ((DirectBuffer) buffer).address(),
-            buffer.capacity() == 0 ? NO_PAGE : ((DirectBuffer) buffer).address() + buffer.capacity()
+                buffer.capacity() == 0 ? NO_PAGE : ((DirectBuffer) buffer).address(),
+                buffer.capacity() == 0 ? NO_PAGE : ((DirectBuffer) buffer).address() + buffer.capacity()
         );
 
         this.buffer = buffer;
@@ -82,8 +82,8 @@ public class VanillaMappedBytes extends NativeBytes {
 
     @Override
     public boolean release() {
-        if(!unmapped()) {
-           return super.release();
+        if (!unmapped()) {
+            return super.release();
         }
 
         return false;
@@ -91,16 +91,16 @@ public class VanillaMappedBytes extends NativeBytes {
 
     @Override
     protected synchronized void cleanup() {
-        if(!this.unmapped) {
-            Cleaner cl = ((DirectBuffer)this.buffer).cleaner();
+        if (!this.unmapped) {
+            Cleaner cl = ((DirectBuffer) this.buffer).cleaner();
             if (cl != null) {
                 long start = System.nanoTime();
                 cl.clean();
 
                 fileLifecycleListener.onEvent(
-                    FileLifecycleListener.EventType.UNMAP,
-                    this.path,
-                    System.nanoTime() - start
+                        FileLifecycleListener.EventType.UNMAP,
+                        this.path,
+                        System.nanoTime() - start
                 );
 
             }
@@ -109,7 +109,7 @@ public class VanillaMappedBytes extends NativeBytes {
                 if (this.channel != null && this.channel.isOpen()) {
                     this.channel.close();
                 }
-            } catch(IOException e) {
+            } catch (IOException e) {
                 throw new AssertionError(e);
             }
 
@@ -124,9 +124,9 @@ public class VanillaMappedBytes extends NativeBytes {
         this.buffer.force();
 
         fileLifecycleListener.onEvent(
-            FileLifecycleListener.EventType.SYNC,
-            this.path,
-            System.nanoTime() - start
+                FileLifecycleListener.EventType.SYNC,
+                this.path,
+                System.nanoTime() - start
         );
     }
 

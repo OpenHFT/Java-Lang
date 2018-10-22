@@ -26,7 +26,7 @@ public interface FloatValue {
 
     void setValue(float value);
 
-   void setOrderedValue(float value);
+    void setOrderedValue(float value);
 
     float getVolatileValue();
 

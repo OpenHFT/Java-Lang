@@ -41,7 +41,7 @@ public final class ResizeableMappedStoreTest {
 
             DirectBytes slice1 = ms.bytes();
             for (int i = 0; i < smallSize; ++i) {
-               slice1.writeByte(42);
+                slice1.writeByte(42);
             }
 
             ms.resize(largeSize);
@@ -49,7 +49,7 @@ public final class ResizeableMappedStoreTest {
             DirectBytes slice2 = ms.bytes();
             slice2.skipBytes(smallSize);
             for (int i = smallSize; i < largeSize; ++i) {
-               slice2.writeByte(24);
+                slice2.writeByte(24);
             }
 
             ms.close();

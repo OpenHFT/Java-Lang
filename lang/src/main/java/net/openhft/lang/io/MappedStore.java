@@ -33,18 +33,18 @@ public class MappedStore extends AbstractMappedStore {
 
     @Deprecated
     public MappedStore(File file, FileChannel.MapMode mode, long size,
-            BytesMarshallerFactory bytesMarshallerFactory) throws IOException {
+                       BytesMarshallerFactory bytesMarshallerFactory) throws IOException {
         this(file, mode, size, BytesMarshallableSerializer.create(
                 bytesMarshallerFactory, JDKZObjectSerializer.INSTANCE));
     }
 
     public MappedStore(File file, FileChannel.MapMode mode, long size,
-            ObjectSerializer objectSerializer) throws IOException {
+                       ObjectSerializer objectSerializer) throws IOException {
         this(file, mode, 0L, size, objectSerializer);
     }
 
     public MappedStore(File file, FileChannel.MapMode mode, long startInFile, long size,
-            ObjectSerializer objectSerializer) throws IOException {
+                       ObjectSerializer objectSerializer) throws IOException {
         super(new MmapInfoHolder(), file, mode, startInFile, size, objectSerializer);
         mmapInfoHolder.lock();
     }

@@ -213,14 +213,14 @@ public abstract class AbstractBytes implements Bytes {
                 case 5:
                 case 6:
                 case 7:
-                /* 0xxxxxxx */
+                    /* 0xxxxxxx */
                     count++;
                     appendable.append((char) c);
                     break;
 
                 case 12:
                 case 13: {
-                /* 110x xxxx 10xx xxxx */
+                    /* 110x xxxx 10xx xxxx */
                     count += 2;
                     if (count > utflen)
                         throw new UTFDataFormatException(
@@ -236,7 +236,7 @@ public abstract class AbstractBytes implements Bytes {
                 }
 
                 case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     count += 3;
                     if (count > utflen)
                         throw new UTFDataFormatException(
@@ -255,7 +255,7 @@ public abstract class AbstractBytes implements Bytes {
                 }
 
                 default:
-                /* 10xx xxxx, 1111 xxxx */
+                    /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
                             "malformed input around byte " + count);
             }
@@ -868,7 +868,7 @@ public abstract class AbstractBytes implements Bytes {
                 case 5:
                 case 6:
                 case 7:
-                /* 0xxxxxxx */
+                    /* 0xxxxxxx */
                     if (tester.isStopChar(c))
                         return;
                     appendable.append((char) c);
@@ -876,7 +876,7 @@ public abstract class AbstractBytes implements Bytes {
 
                 case 12:
                 case 13: {
-                /* 110x xxxx 10xx xxxx */
+                    /* 110x xxxx 10xx xxxx */
                     int char2 = readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
@@ -890,7 +890,7 @@ public abstract class AbstractBytes implements Bytes {
                 }
 
                 case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     int char2 = readUnsignedByte();
                     int char3 = readUnsignedByte();
 
@@ -907,7 +907,7 @@ public abstract class AbstractBytes implements Bytes {
                 }
 
                 default:
-                /* 10xx xxxx, 1111 xxxx */
+                    /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
                             "malformed input around byte ");
             }

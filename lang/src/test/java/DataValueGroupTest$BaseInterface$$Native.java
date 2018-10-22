@@ -58,28 +58,34 @@ public class DataValueGroupTest$BaseInterface$$Native implements GroupTest.BaseI
         out.writeInt(getInt());
         out.writeUTFΔ(getStr());
     }
+
     @Override
     public void readMarshallable(Bytes in) {
         setInt(in.readInt());
         setStr(in.readUTFΔ());
     }
+
     @Override
     public void bytes(Bytes bytes, long offset) {
-       this._bytes = bytes;
-       this._offset = offset;
+        this._bytes = bytes;
+        this._offset = offset;
     }
+
     @Override
     public Bytes bytes() {
-       return _bytes;
+        return _bytes;
     }
+
     @Override
     public long offset() {
         return _offset;
     }
+
     @Override
     public int maxSize() {
-       return 19;
+        return 19;
     }
+
     public int hashCode() {
         long lhc = longHashCode();
         return (int) ((lhc >>> 32) ^ lhc);
@@ -87,7 +93,7 @@ public class DataValueGroupTest$BaseInterface$$Native implements GroupTest.BaseI
 
     public long longHashCode() {
         return (calcLongHashCode(getInt())) * 10191 +
-            calcLongHashCode(getStr());
+                calcLongHashCode(getStr());
     }
 
     public boolean equals(Object o) {
@@ -95,7 +101,7 @@ public class DataValueGroupTest$BaseInterface$$Native implements GroupTest.BaseI
         if (!(o instanceof GroupTest.BaseInterface)) return false;
         GroupTest.BaseInterface that = (GroupTest.BaseInterface) o;
 
-        if(!isEqual(getInt(), that.getInt())) return false;
+        if (!isEqual(getInt(), that.getInt())) return false;
         return isEqual(getStr(), that.getStr());
     }
 
@@ -103,9 +109,10 @@ public class DataValueGroupTest$BaseInterface$$Native implements GroupTest.BaseI
         if (_bytes == null) return "bytes is null";
         StringBuilder sb = new StringBuilder();
         sb.append("DataValueGroupTest.BaseInterface{ ");
-            sb.append("int= ").append(getInt());
-sb.append(", ")
-;            sb.append("str= ").append(getStr());
+        sb.append("int= ").append(getInt());
+        sb.append(", ")
+        ;
+        sb.append("str= ").append(getStr());
         sb.append(" }");
         return sb.toString();
     }

@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class VanillaMappedCache<T> implements Closeable {
     private final boolean cleanOnClose;
-    private final Map<T,VanillaMappedBytes> cache;
+    private final Map<T, VanillaMappedBytes> cache;
     private final FileLifecycleListener fileLifecycleListener;
 
     public VanillaMappedCache() {
@@ -38,12 +38,12 @@ public class VanillaMappedCache<T> implements Closeable {
     public VanillaMappedCache(final int maximumCacheSize, boolean releaseOnRemove) {
         this(maximumCacheSize, releaseOnRemove, false);
     }
+
     public VanillaMappedCache(final int maximumCacheSize, final boolean releaseOnRemove, final boolean cleanOnClose) {
         this(maximumCacheSize, releaseOnRemove, cleanOnClose, FileLifecycleListener.FileLifecycleListeners.IGNORE);
     }
 
     /**
-     *
      * @param maximumCacheSize      the maximum number of VanillaMappedBytes to cache
      * @param releaseOnRemove       release the VanillaMappedBytes when evicted from cache
      * @param cleanOnClose          clean the VanillaMappedBytes when evicted from cache
@@ -55,19 +55,19 @@ public class VanillaMappedCache<T> implements Closeable {
             final boolean cleanOnClose,
             FileLifecycleListener fileLifecycleListener) {
 
-        this(new LinkedHashMap<T, VanillaMappedBytes>(maximumCacheSize,1.0f,true) {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<T, VanillaMappedBytes> eldest) {
-                    boolean removed = size() >= maximumCacheSize;
-                    if (removed && releaseOnRemove) {
-                        eldest.getValue().release();
-                    }
+        this(new LinkedHashMap<T, VanillaMappedBytes>(maximumCacheSize, 1.0f, true) {
+                 @Override
+                 protected boolean removeEldestEntry(Map.Entry<T, VanillaMappedBytes> eldest) {
+                     boolean removed = size() >= maximumCacheSize;
+                     if (removed && releaseOnRemove) {
+                         eldest.getValue().release();
+                     }
 
-                    return removed;
-                }
-            },
-            cleanOnClose,
-            fileLifecycleListener);
+                     return removed;
+                 }
+             },
+                cleanOnClose,
+                fileLifecycleListener);
     }
 
     private VanillaMappedCache(final Map<T, VanillaMappedBytes> cache, final boolean cleanOnClose, FileLifecycleListener fileLifecycleListener) {
@@ -81,24 +81,24 @@ public class VanillaMappedCache<T> implements Closeable {
     }
 
     public VanillaMappedBytes put(T key, File path, long size) throws IOException {
-        return put(key,path,size,-1);
+        return put(key, path, size, -1);
     }
 
     public VanillaMappedBytes put(T key, File path, long size, long index) throws IOException {
         VanillaMappedBytes data = this.cache.get(key);
 
-        if(data != null) {
+        if (data != null) {
             if (!data.unmapped()) {
                 data.cleanup();
 
                 throw new IllegalStateException(
-                    "Buffer at " + data.index() + " has a count of " + + data.refCount()
+                        "Buffer at " + data.index() + " has a count of " + +data.refCount()
                 );
             }
         }
 
         data = VanillaMappedFile.readWriteBytes(path, size, index, fileLifecycleListener);
-        this.cache.put(key,data);
+        this.cache.put(key, data);
 
         return data;
     }
@@ -109,17 +109,17 @@ public class VanillaMappedCache<T> implements Closeable {
 
     @Override
     public void close() {
-        final Iterator<Map.Entry<T,VanillaMappedBytes>> it = this.cache.entrySet().iterator();
-        while(it.hasNext()) {
-            Map.Entry<T,VanillaMappedBytes> entry = it.next();
+        final Iterator<Map.Entry<T, VanillaMappedBytes>> it = this.cache.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<T, VanillaMappedBytes> entry = it.next();
             entry.getValue().release();
 
-            if(this.cleanOnClose && !entry.getValue().unmapped()) {
+            if (this.cleanOnClose && !entry.getValue().unmapped()) {
                 entry.getValue().cleanup();
                 entry.getValue().close();
                 it.remove();
 
-            } else  if(entry.getValue().unmapped()) {
+            } else if (entry.getValue().unmapped()) {
                 entry.getValue().close();
                 it.remove();
             }
@@ -129,10 +129,10 @@ public class VanillaMappedCache<T> implements Closeable {
     }
 
     public synchronized void checkCounts(int min, int max) {
-        for(VanillaMappedBytes data : this.cache.values()) {
+        for (VanillaMappedBytes data : this.cache.values()) {
             if (data.refCount() < min || data.refCount() > max) {
                 throw new IllegalStateException(
-                    "Buffer at " + data.index() + " has a count of " + + data.refCount()
+                        "Buffer at " + data.index() + " has a count of " + +data.refCount()
                 );
             }
         }

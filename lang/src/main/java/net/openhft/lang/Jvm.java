@@ -134,13 +134,13 @@ public enum Jvm {
             File file = new File("/proc/sys/kernel/pid_max");
             if (file.canRead()) {
                 Scanner scanner = null;
-                try{
+                try {
                     scanner = new Scanner(file);
                     return Maths.nextPower2(scanner.nextLong(), 1 << 16);
                 } catch (FileNotFoundException e) {
                     LoggerHolder.LOGGER.log(Level.WARNING, "", e);
-                }finally {
-                    if(scanner != null)
+                } finally {
+                    if (scanner != null)
                         scanner.close();
                 }
             }

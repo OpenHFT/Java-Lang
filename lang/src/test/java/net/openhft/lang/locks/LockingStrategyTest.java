@@ -37,7 +37,7 @@ import static org.junit.Assume.assumeTrue;
 
 @RunWith(value = Parameterized.class)
 public class LockingStrategyTest {
-    
+
     ExecutorService e1, e2;
     ByteBuffer buffer;
     Bytes bytes;
@@ -49,7 +49,7 @@ public class LockingStrategyTest {
     TestReadWriteLockState rwLockState = new TestReadWriteLockState();
     Callable<Boolean> tryReadLockTask = new Callable<Boolean>() {
         @Override
-        public Boolean call()   {
+        public Boolean call() {
             return rwls().tryReadLock();
         }
     };
@@ -62,7 +62,7 @@ public class LockingStrategyTest {
     };
     Callable<Boolean> tryUpdateLockTask = new Callable<Boolean>() {
         @Override
-        public Boolean call()   {
+        public Boolean call() {
             return rwuls().tryUpdateLock();
         }
     };
@@ -74,7 +74,7 @@ public class LockingStrategyTest {
     };
     Callable<Boolean> tryWriteLockTask = new Callable<Boolean>() {
         @Override
-        public Boolean call()   {
+        public Boolean call() {
             return rwls().tryWriteLock();
         }
     };
@@ -217,7 +217,7 @@ public class LockingStrategyTest {
         // Try to acquire write lock in thread 1, should succeed...
         assertTrue(e1.submit(new Callable<Boolean>() {
             @Override
-            public Boolean call()   {
+            public Boolean call() {
                 return rwuls().tryUpgradeUpdateToWriteLock();
             }
         }).get());
@@ -272,7 +272,8 @@ public class LockingStrategyTest {
         // allow downgrade to read lock
         try {
             rwls().downgradeWriteToReadLock();
-        } catch (UnsupportedOperationException tolerated) {}
+        } catch (UnsupportedOperationException tolerated) {
+        }
 
         rwls().reset();
     }

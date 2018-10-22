@@ -40,7 +40,7 @@ public class JavaSerializationTest {
         bytes.writeObject(expected);
 
         bytes.position(0);
-        NullPointerException actual = (NullPointerException)bytes.readObject();
+        NullPointerException actual = (NullPointerException) bytes.readObject();
 
         Assert.assertEquals(expected, actual);
     }

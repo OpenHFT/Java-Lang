@@ -44,7 +44,7 @@ public class NativeBytes extends AbstractBytes {
     protected static final long NO_PAGE;
     static final int BYTES_OFFSET;
     static final int CHARS_OFFSET;
-    
+
     static {
         try {
             @SuppressWarnings("ALL")
@@ -372,7 +372,7 @@ public class NativeBytes extends AbstractBytes {
     public char readChar() {
         //char ch = UNSAFE.getChar(positionAddr);
         char ch = Bits.getChar(positionAddr);
-        
+
         addPosition(2);
         return ch;
     }
@@ -381,7 +381,7 @@ public class NativeBytes extends AbstractBytes {
     public char readChar(long offset) {
         //return UNSAFE.getChar(startAddr + offset);
         return Bits.getChar(startAddr + offset);
-     
+
     }
 
     @Override
@@ -397,7 +397,7 @@ public class NativeBytes extends AbstractBytes {
     public int readInt(long offset) {
         //return UNSAFE.getInt(startAddr + offset);
         return Bits.getInt(startAddr + offset);
-}
+    }
 
     @Override
     public int readVolatileInt() {
@@ -509,7 +509,7 @@ public class NativeBytes extends AbstractBytes {
         positionChecks(positionAddr + 2L);
         //UNSAFE.putShort(positionAddr, (short) v);
         Bits.putShort(positionAddr, (short) v);
-        
+
         positionAddr += 2L;
     }
 
@@ -530,7 +530,7 @@ public class NativeBytes extends AbstractBytes {
         positionChecks(positionAddr + 2L);
         //UNSAFE.putChar(positionAddr, (char) v);
         Bits.putChar(positionAddr, (char) v);
-          
+
         positionAddr += 2L;
     }
 
@@ -550,7 +550,7 @@ public class NativeBytes extends AbstractBytes {
         positionChecks(positionAddr + 4L);
         //UNSAFE.putInt(positionAddr, v);
         Bits.putInt(positionAddr, v);
-         
+
         positionAddr += 4L;
     }
 
@@ -626,7 +626,7 @@ public class NativeBytes extends AbstractBytes {
     @Override
     public void writeFloat(long offset, float v) {
         offsetChecks(offset, 4L);
-       // UNSAFE.putFloat(startAddr + offset, v);
+        // UNSAFE.putFloat(startAddr + offset, v);
         Bits.putFloat(startAddr + offset, v);
     }
 
@@ -891,7 +891,6 @@ public class NativeBytes extends AbstractBytes {
             return nextSetBit0((int) firstByte, (int) capacity, startAddr);
         return nextSetBit0(firstByte, capacity, startAddr);
     }
-    
 
-      
+
 }

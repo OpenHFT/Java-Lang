@@ -96,7 +96,7 @@ public enum ByteBufferZMarshaller implements CompactBytesMarshaller<ByteBuffer> 
                 throw new IllegalStateException(e);
             }
         }
-        
+
         bytes.position(end);
         bytes.limit(limit);
 

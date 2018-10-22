@@ -137,8 +137,8 @@ interface ByteBufferReuse {
         private static String getAttachedBufferFieldName() {
             try {
                 Class<?> clazz = Class.forName("java.nio.DirectByteBuffer");
-                String[] possibleFieldNames = new String[] { "att",
-                        "viewedBuffer" };
+                String[] possibleFieldNames = new String[]{"att",
+                        "viewedBuffer"};
                 for (String possibleFieldName : possibleFieldNames) {
                     try {
                         clazz.getDeclaredField(possibleFieldName);

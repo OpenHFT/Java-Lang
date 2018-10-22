@@ -26,11 +26,13 @@ import static org.junit.Assert.assertEquals;
 
 interface FiveLongValues {
     void setValueAt(@MaxSize(5) int i, long v);
+
     long getValueAt(int i);
 }
 
 interface FiveBooleanValues {
     void setValueAt(@MaxSize(5) int i, boolean v);
+
     boolean getValueAt(int i);
 }
 

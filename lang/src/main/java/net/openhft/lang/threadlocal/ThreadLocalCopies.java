@@ -29,6 +29,7 @@ public final class ThreadLocalCopies {
     final AtomicBoolean currentlyAccessed = new AtomicBoolean(false);
     Object[] table;
     int size = 0, sizeLimit, mask;
+
     public ThreadLocalCopies() {
         init(32); // 16 entries
     }

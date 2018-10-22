@@ -45,7 +45,7 @@ public final class VanillaBytesMarshallerFactory implements BytesMarshallerFacto
 
         BytesMarshaller<String> stringMarshaller = new StringMarshaller(16 * 1024);
         addMarshaller(String.class, stringMarshaller);
-        addMarshaller(CharSequence.class, (BytesMarshaller)stringMarshaller);
+        addMarshaller(CharSequence.class, (BytesMarshaller) stringMarshaller);
         addMarshaller(Class.class, new ClassMarshaller(Thread.currentThread().getContextClassLoader()));
         addMarshaller(Date.class, new DateMarshaller(10191));
         addMarshaller(Integer.class, new CompactEnumBytesMarshaller<Integer>(Integer.class, 10191, INT_CODE));

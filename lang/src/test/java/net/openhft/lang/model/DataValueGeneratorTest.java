@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class DataValueGeneratorTest {
     @Test
-    public void testGenerateJavaCode()   {
+    public void testGenerateJavaCode() {
         DataValueGenerator dvg = new DataValueGenerator();
         //dvg.setDumpCode(true);
         JavaBeanInterface jbi = dvg.heapInstance(JavaBeanInterface.class);
@@ -56,7 +56,7 @@ public class DataValueGeneratorTest {
     }
 
     @Test
-    public void testGenerateJavaCode2()   {
+    public void testGenerateJavaCode2() {
         DataValueGenerator dvg = new DataValueGenerator();
         MinimalInterface mi = dvg.heapInstance(MinimalInterface.class);
 
@@ -201,7 +201,7 @@ public class DataValueGeneratorTest {
     }
 
     @Test
-    public void testGenerateInterfaceWithEnumOnHeap()   {
+    public void testGenerateInterfaceWithEnumOnHeap() {
         DataValueGenerator dvg = new DataValueGenerator();
         //dvg.setDumpCode(true);
         JavaBeanInterfaceGetMyEnum jbie = dvg.heapInstance(JavaBeanInterfaceGetMyEnum.class);
@@ -209,7 +209,7 @@ public class DataValueGeneratorTest {
     }
 
     @Test
-    public void testGenerateInterfaceWithEnumNativeInstance()   {
+    public void testGenerateInterfaceWithEnumNativeInstance() {
         DataValueGenerator dvg = new DataValueGenerator();
         //dvg.setDumpCode(true);
         JavaBeanInterfaceGetMyEnum jbie = dvg.nativeInstance(JavaBeanInterfaceGetMyEnum.class);
@@ -219,7 +219,7 @@ public class DataValueGeneratorTest {
     }
 
     @Test
-    public void testGenerateInterfaceWithDateOnHeap()   {
+    public void testGenerateInterfaceWithDateOnHeap() {
         DataValueGenerator dvg = new DataValueGenerator();
         //dvg.setDumpCode(true);
         JavaBeanInterfaceGetDate jbid = dvg.heapInstance(JavaBeanInterfaceGetDate.class);
@@ -227,7 +227,7 @@ public class DataValueGeneratorTest {
     }
 
     @Test
-    public void testGenerateInterfaceWithDateNativeInstace()   {
+    public void testGenerateInterfaceWithDateNativeInstace() {
         DataValueGenerator dvg = new DataValueGenerator();
         //dvg.setDumpCode(true);
         JavaBeanInterfaceGetDate jbid = dvg.nativeInstance(JavaBeanInterfaceGetDate.class);

@@ -22,13 +22,13 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>root-parent-pom</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.12</version>
         <relativePath/>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>Java-Lang</artifactId>
-    <version>6.8.x-SNAPSHOT</version>
+    <version>6.17.x-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Java Lang Parent</name>
