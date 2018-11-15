@@ -1,8 +1,8 @@
 # JavaLang
 
-<aside class="warning">
-This project has been superceded by Chronicle-Core and Chronicle-Bytes project. Please consider migration!
-</aside>
+---
+###This project has been superceded by Chronicle-Core and Chronicle-Bytes project. Please consider migration!
+---
 
 This module provides marshalling, de-marshalling and handling of thread safe off heap memory through ByteBuffers.
 
