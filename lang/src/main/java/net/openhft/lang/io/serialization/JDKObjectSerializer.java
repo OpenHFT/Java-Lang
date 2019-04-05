@@ -28,7 +28,7 @@ public enum JDKObjectSerializer implements ObjectSerializer {
 
     @Override
     public void writeSerializable(Bytes bytes, Object object, Class expectedClass) throws IOException {
-        ObjectOutputStream oos= new ObjectOutputStream(bytes.outputStream());
+        ObjectOutputStream oos = new ObjectOutputStream(bytes.outputStream());
         oos.writeObject(object);
         oos.close();
     }

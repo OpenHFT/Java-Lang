@@ -28,7 +28,7 @@ public interface ByteStringParser extends BytesCommon {
     /**
      * If set to true, the end of the Bytes will be the end of any consuming String, double or long.
      * If false, incomplete reads will throw a BufferUnderflowException
-
+     *
      * @param selfTerminate if true, the end of the Buffer is silent.
      */
     void selfTerminating(boolean selfTerminate);

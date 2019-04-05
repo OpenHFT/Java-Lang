@@ -40,10 +40,10 @@ public enum DataValueModels {
         if (!tClass.isInterface() || tClass.getClassLoader() == null)
             throw new IllegalArgumentException(tClass + " not supported");
         DataValueModel<T> model = getModel(tClass);
-            if (model == null) {
-                model = new DataValueModelImpl<T>(tClass);
-                putModel(tClass, model);
-            }
+        if (model == null) {
+            model = new DataValueModelImpl<T>(tClass);
+            putModel(tClass, model);
+        }
         return model;
     }
 }

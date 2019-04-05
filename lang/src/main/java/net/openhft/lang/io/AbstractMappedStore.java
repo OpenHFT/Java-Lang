@@ -171,26 +171,26 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
     }
 
     @Override
-    public final  void free() {
+    public final void free() {
         cleaner.clean();
     }
 
     @Override
-    public final  void close() {
+    public final void close() {
         free();
     }
 
     @NotNull
-    public final  DirectBytes bytes() {
+    public final DirectBytes bytes() {
         return new DirectBytes(this, refCount);
     }
 
     @NotNull
-    public final  DirectBytes bytes(long offset, long length) {
+    public final DirectBytes bytes(long offset, long length) {
         return new DirectBytes(this, refCount, offset, length);
     }
 
-    public final  File file() {
+    public final File file() {
         return file;
     }
 
@@ -256,8 +256,8 @@ abstract class AbstractMappedStore implements BytesStore, Closeable {
                 raf.close();
             } catch (IOException e) {
                 UnmapperLoggerHolder.LOGGER.log(Level.SEVERE,
-                    "An exception has occurred while cleaning up a MappedStore instance: " +
-                            e.getMessage(), e);
+                        "An exception has occurred while cleaning up a MappedStore instance: " +
+                                e.getMessage(), e);
             }
         }
     }

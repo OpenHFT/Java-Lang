@@ -774,7 +774,7 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      * Copy bytes into a ByteBuffer to the minimum of the length in the ByteBuffer or the
      * Excerpt.
      *
-     * @param bb to copy into
+     * @param bb     to copy into
      * @param length number of bytes to copy
      */
     void read(@NotNull ByteBuffer bb, int length);
@@ -786,7 +786,7 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      * <p>This is suitable to read an object written using <code>writeEnum()</code> in the <code>RandomDataOutput</code>
      * interface
      *
-     * @param <E> the enum class
+     * @param <E>    the enum class
      * @param eClass to decode the String as
      * @return the decoded value.  <code>null</code> with be return if null was written.
      */
@@ -799,9 +799,9 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      * <p>This is suitable to reading a list written using <code>writeList()</code> in the <code>RandomDataOutput</code>
      * interface
      *
-     * @param <E> the list element class
+     * @param <E>    the list element class
      * @param eClass the list element class
-     * @param list to populate
+     * @param list   to populate
      */
     <E> void readList(@NotNull Collection<E> list, @NotNull Class<E> eClass);
 
@@ -811,11 +811,11 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
      * <p>This is suitable to reading a list written using <code>writeMap()</code> in the <code>RandomDataOutput</code>
      * interface
      *
-     * @param <K> the map key class
-     * @param <V> the map value class
+     * @param <K>    the map key class
+     * @param <V>    the map value class
      * @param kClass the map key class
      * @param vClass the map value class
-     * @param map to populate
+     * @param map    to populate
      * @return the map
      */
     <K, V> Map<K, V> readMap(@NotNull Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass);
@@ -836,7 +836,7 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     /**
      * Read and return an object. The class that implements this interface defines where the object is "read" from.
      *
-     * @param <T> the class of the object to read
+     * @param <T>    the class of the object to read
      * @param tClass the class of the object to read
      * @return the object read from the stream
      * @throws IllegalStateException the class of a serialized object cannot be found or any of the usual Input/Output
@@ -849,7 +849,7 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     /**
      * Read an instance of a class assuming objClass was provided when written.
      *
-     * @param <T> the class of the object to read
+     * @param <T>      the class of the object to read
      * @param objClass class to write
      * @param obj      to reuse or null if a new object is needed
      * @return the object read from the stream
@@ -916,7 +916,7 @@ public interface RandomDataInput extends ObjectInput, RandomAccess, BytesCommon 
     void close();
 
     boolean startsWith(RandomDataInput input);
-    
+
     boolean compare(long offset, RandomDataInput input, long inputOffset, long len);
 
     <E> E readEnum(long offset, int maxSize, Class<E> eClass);

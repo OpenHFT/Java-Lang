@@ -55,8 +55,8 @@ public class MappedStoreTest {
         assertEquals(0L, slice.readLong(0L));
         assertEquals(0L, slice.readLong(ms.size() - 8));
 
-        slice.writeLong(0,1L);
-        assertEquals(1L,slice.readLong(0));
+        slice.writeLong(0, 1L);
+        assertEquals(1L, slice.readLong(0));
 
         slice.release();
 
@@ -82,7 +82,7 @@ public class MappedStoreTest {
         {
             MappedStore ms2 = new MappedStore(file, FileChannel.MapMode.READ_WRITE, MS_SIZE);
             DirectBytes slice2 = ms2.bytes();
-            assertEquals( 1, slice2.refCount());
+            assertEquals(1, slice2.refCount());
             assertEquals(1L, slice2.readLong());
             assertEquals(2L, slice2.readLong());
 

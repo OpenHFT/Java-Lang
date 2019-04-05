@@ -34,7 +34,7 @@ public class VolatileTest {
     @Test
     public void testGenerateJavaCode() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         DataValueGenerator dvg = new DataValueGenerator();
-       // dvg.setDumpCode(true);
+        // dvg.setDumpCode(true);
 
    /*     try{
             BadInterface1 jbi = dvg.heapInstance(BadInterface1.class);
@@ -51,27 +51,27 @@ public class VolatileTest {
         }
 */
         //Test the heap interface
-        try{
+        try {
             GoodInterface jbi = dvg.heapInstance(GoodInterface.class);
 
             jbi.setOrderedY(5);
             assertEquals(5, jbi.getVolatileY());
-            jbi.setOrderedIntAt(0,0);
-            jbi.setOrderedIntAt(1,1);
-            jbi.setOrderedIntAt(2,2);
-            jbi.setOrderedIntAt(3,3);
+            jbi.setOrderedIntAt(0, 0);
+            jbi.setOrderedIntAt(1, 1);
+            jbi.setOrderedIntAt(2, 2);
+            jbi.setOrderedIntAt(3, 3);
 
             assertEquals(0, jbi.getVolatileIntAt(0));
             assertEquals(1, jbi.getVolatileIntAt(1));
             assertEquals(2, jbi.getVolatileIntAt(2));
             assertEquals(3, jbi.getVolatileIntAt(3));
-        }catch(AssertionError e){
+        } catch (AssertionError e) {
             e.printStackTrace();
             assertFalse("Throws an IllegalArgumentException", true);
         }
 
         //Test the native interface
-        try{
+        try {
             String actual = new DataValueGenerator().generateNativeObject(GoodInterface.class);
             System.out.println(actual);
             CachedCompiler cc = new CachedCompiler(null, null);
@@ -82,34 +82,34 @@ public class VolatileTest {
 
             jbi.setOrderedY(5);
             assertEquals(5, jbi.getVolatileY());
-            jbi.setOrderedIntAt(0,0);
-            jbi.setOrderedIntAt(1,1);
-            jbi.setOrderedIntAt(2,2);
-            jbi.setOrderedIntAt(3,3);
+            jbi.setOrderedIntAt(0, 0);
+            jbi.setOrderedIntAt(1, 1);
+            jbi.setOrderedIntAt(2, 2);
+            jbi.setOrderedIntAt(3, 3);
 
             assertEquals(0, jbi.getVolatileIntAt(0));
             assertEquals(1, jbi.getVolatileIntAt(1));
             assertEquals(2, jbi.getVolatileIntAt(2));
             assertEquals(3, jbi.getVolatileIntAt(3));
-        }catch(AssertionError e){
+        } catch (AssertionError e) {
             e.printStackTrace();
             assertFalse("Throws an IllegalArgumentException", true);
         }
     }
 
-    public interface BadInterface1{
+    public interface BadInterface1 {
         int getX();
 
         void setOrderedX(int x);
     }
 
-    public interface BadInterface2{
+    public interface BadInterface2 {
         int getVolatileX();
 
         void setX(int x);
     }
 
-    public interface GoodInterface{
+    public interface GoodInterface {
         int getX();
 
         void setX(int x);
@@ -123,6 +123,7 @@ public class VolatileTest {
         void setY(int y);
 
         void setOrderedIntAt(@MaxSize(4) int idx, int i);
+
         int getVolatileIntAt(int idx);
     }
 }

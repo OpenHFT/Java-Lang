@@ -143,7 +143,7 @@ public class DirectStore implements BytesStore, AutoCloseable {
      * calls free
      */
     @Override
-    public void close()   {
+    public void close() {
         free();
     }
 

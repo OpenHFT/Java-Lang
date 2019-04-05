@@ -1,10 +1,6 @@
 package net.openhft.lang.io;
 
-import java.lang.reflect.Field;
-import java.nio.ByteOrder;
-
 import org.jetbrains.annotations.NotNull;
-
 import sun.misc.Unsafe;
 
 @SuppressWarnings("restriction")
@@ -29,7 +25,6 @@ public class Bits {
     } catch (Exception e) {
       throw new AssertionError(e);
     }
-  }
 
   public static short getShort(long addr) {
     return ALIGNED.getShortByByte(addr);

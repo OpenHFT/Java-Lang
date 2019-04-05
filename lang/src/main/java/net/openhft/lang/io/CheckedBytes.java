@@ -59,13 +59,13 @@ public class CheckedBytes implements Bytes {
     }
 
     void checkNotClosed() {
-        if(this.isClosed) {
+        if (this.isClosed) {
             System.err.print("Thread " + Thread.currentThread().getName() + " performing processing " + "after free()");
             ThreadInfo[] threads = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
             ThreadInfo[] arr$ = threads;
             int len$ = threads.length;
 
-            for(int i$ = 0; i$ < len$; ++i$) {
+            for (int i$ = 0; i$ < len$; ++i$) {
                 ThreadInfo info = arr$[i$];
                 System.out.print(info);
             }
@@ -73,6 +73,7 @@ public class CheckedBytes implements Bytes {
             System.exit(-1);
         }
     }
+
     public void free() {
         this.isClosed = true;
         this.bytes.free();

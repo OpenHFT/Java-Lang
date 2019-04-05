@@ -39,7 +39,7 @@ interface CharBufferReuse {
             final String reuseImplClassName = "net/openhft/lang/io/CharBufferReuseImpl";
             cw.visit(V1_6, ACC_PUBLIC + ACC_SUPER, reuseImplClassName, null,
                     "sun/reflect/MagicAccessorImpl",
-                    new String[] {"net/openhft/lang/io/CharBufferReuse"});
+                    new String[]{"net/openhft/lang/io/CharBufferReuse"});
 
             {
                 mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);

@@ -72,7 +72,7 @@ public class DataValueModelImpl<T> implements DataValueModel<T> {
                 continue;
 
             // ignore the default or static methods
-            if(isMethodDefaultOrStatic(method))
+            if (isMethodDefaultOrStatic(method))
                 continue;
 
             String name = method.getName();
@@ -470,6 +470,7 @@ public class DataValueModelImpl<T> implements DataValueModel<T> {
                     group = (Group) a;
             }
         }
+
         public Method setter() {
             return setter;
         }
@@ -673,7 +674,7 @@ public class DataValueModelImpl<T> implements DataValueModel<T> {
                 if (a instanceof MaxSize)
                     indexSize = (MaxSize) a;
             }
-            if( parameterAnnotations.length > 1 ) {
+            if (parameterAnnotations.length > 1) {
                 for (Annotation a : parameterAnnotations[1]) {
                     if (a instanceof Digits)
                         digits = (Digits) a;

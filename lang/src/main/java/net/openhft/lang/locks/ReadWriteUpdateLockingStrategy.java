@@ -18,7 +18,7 @@ package net.openhft.lang.locks;
 
 /**
  * Logic of read-write-update lock state transitions.
- *
+ * <p>
  * Read lock - could be several at the same time.
  * Update lock - doesn't block reads, but couldn't be several update locks at the same time
  * Write lock - exclusive

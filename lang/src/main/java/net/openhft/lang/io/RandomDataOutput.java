@@ -51,15 +51,15 @@ public interface RandomDataOutput extends ObjectOutput, RandomAccess, BytesCommo
      *
      * <pre>
      *     while (src.hasRemaining())
-     *         dst.writeByte(src.readByte()); 
-     *  </pre> 
-
+     *         dst.writeByte(src.readByte());
+     *  </pre>
+     *
      * @param bytes to copy
      */
     void write(RandomDataInput bytes);
 
     /**
-     * Copy from one Bytes to another, moves the position of "this" RandomDataOutput by the length.  
+     * Copy from one Bytes to another, moves the position of "this" RandomDataOutput by the length.
      * The position of the RandomDataInput is not used or altered.
      *
      * @param bytes    to copy
@@ -816,6 +816,7 @@ public interface RandomDataOutput extends ObjectOutput, RandomAccess, BytesCommo
     void writeUTFΔ(long offset, int maxSize, @Nullable CharSequence s) throws IllegalStateException;
 
     void write8bitText(@Nullable CharSequence s);
+
     /**
      * Copies the contents of a ByteBuffer from the position to the limit.
      *
@@ -836,8 +837,8 @@ public interface RandomDataOutput extends ObjectOutput, RandomAccess, BytesCommo
      *
      * <pre>
      *     while (src.hasRemaining())
-     *         dst.writeByte(src.get()); 
-     *  </pre> 
+     *         dst.writeByte(src.get());
+     *  </pre>
      *
      * @param bb to copy.
      */

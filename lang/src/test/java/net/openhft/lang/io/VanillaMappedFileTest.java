@@ -26,9 +26,9 @@ import java.io.Serializable;
 import static org.junit.Assert.*;
 
 public class VanillaMappedFileTest {
-    public static String TMPDIR    = System.getProperty("java.io.tmpdir");
+    public static String TMPDIR = System.getProperty("java.io.tmpdir");
     public static String SEPARATOR = System.getProperty("file.separator");
-    public static String BASEPATH  = TMPDIR + SEPARATOR + "vmf";
+    public static String BASEPATH = TMPDIR + SEPARATOR + "vmf";
 
     private static File newTempraryFile(String name) {
         return newTempraryFile(name, true);
@@ -36,15 +36,15 @@ public class VanillaMappedFileTest {
 
     private static File newTempraryFile(String name, boolean delete) {
         File file = new File(
-            BASEPATH,
-            name);
+                BASEPATH,
+                name);
 
         if (delete) {
             file.delete();
             file.deleteOnExit();
         }
 
-        if(!file.getParentFile().exists()) {
+        if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
 
@@ -73,7 +73,7 @@ public class VanillaMappedFileTest {
         File f2 = newTempraryFile("vmf-create-2");
 
         VanillaMappedFile vmf1 = VanillaMappedFile.readWrite(f1);
-        VanillaMappedFile vmf2 = VanillaMappedFile.readWrite(f2,128);
+        VanillaMappedFile vmf2 = VanillaMappedFile.readWrite(f2, 128);
 
         assertTrue(f1.exists());
         assertTrue(f2.exists());
@@ -92,7 +92,7 @@ public class VanillaMappedFileTest {
 
         assertTrue(new File(vmf.path()).exists());
 
-        VanillaMappedBytes buffer = vmf.bytes(0,128);
+        VanillaMappedBytes buffer = vmf.bytes(0, 128);
         assertEquals(1, buffer.refCount());
         assertEquals(0L, buffer.readLong(0L));
         assertEquals(0L, buffer.readLong(1L));
@@ -113,7 +113,7 @@ public class VanillaMappedFileTest {
     public void testAcquireBlocks1() throws IOException {
         VanillaMappedBlocks blocks = VanillaMappedBlocks.readWrite(
                 newTempraryFile("vmf-acquire-blocks-1"),
-            128);
+                128);
 
         assertTrue(new File(blocks.path()).exists());
 
@@ -147,7 +147,7 @@ public class VanillaMappedFileTest {
     public void testAcquireBlocks2() throws IOException {
         VanillaMappedBlocks blocks = VanillaMappedBlocks.readWrite(
                 newTempraryFile("vmf-acquire-blocks-2"),
-            64);
+                64);
 
         assertTrue(new File(blocks.path()).exists());
 
@@ -169,8 +169,8 @@ public class VanillaMappedFileTest {
     public void testAcquireOverlap() throws IOException {
         File path = newTempraryFile("vmf-acquire-overlap");
 
-        VanillaMappedFile   vmf    = VanillaMappedFile.readWrite(path);
-        VanillaMappedBlocks blocks = VanillaMappedBlocks.readWrite(path,128);
+        VanillaMappedFile vmf = VanillaMappedFile.readWrite(path);
+        VanillaMappedBlocks blocks = VanillaMappedBlocks.readWrite(path, 128);
 
         VanillaMappedBytes b1 = blocks.acquire(0);
         b1.writeLong(1);
@@ -197,11 +197,11 @@ public class VanillaMappedFileTest {
         assertFalse(b3.unmapped());
 
         VanillaMappedBytes b4 = vmf.bytes(0, 128 * 3);
-        assertEquals(  1, b4.refCount());
+        assertEquals(1, b4.refCount());
         assertEquals(384, b4.size());
-        assertEquals( 1L, b4.readLong(0));
-        assertEquals( 2L, b4.readLong(128));
-        assertEquals( 3L, b4.readLong(256));
+        assertEquals(1L, b4.readLong(0));
+        assertEquals(2L, b4.readLong(128));
+        assertEquals(3L, b4.readLong(256));
 
         vmf.close();
         blocks.close();
@@ -212,12 +212,12 @@ public class VanillaMappedFileTest {
         File file = newTempraryFile("vmf-reopen");
 
         {
-            VanillaMappedFile  vmf = VanillaMappedFile.readWrite(file);
-            VanillaMappedBytes buf = vmf.bytes(0,128);
+            VanillaMappedFile vmf = VanillaMappedFile.readWrite(file);
+            VanillaMappedBytes buf = vmf.bytes(0, 128);
 
             buf.writeLong(0, 1L);
-            
-            assertEquals(1L , buf.readLong(0));
+
+            assertEquals(1L, buf.readLong(0));
             assertEquals(128, vmf.size());
 
             buf.release();
@@ -225,10 +225,10 @@ public class VanillaMappedFileTest {
         }
 
         {
-            VanillaMappedFile  vmf = VanillaMappedFile.readWrite(file);
-            VanillaMappedBytes buf = vmf.bytes(0,128);
+            VanillaMappedFile vmf = VanillaMappedFile.readWrite(file);
+            VanillaMappedBytes buf = vmf.bytes(0, 128);
 
-            assertEquals(1L , buf.readLong(0));
+            assertEquals(1L, buf.readLong(0));
             assertEquals(128, vmf.size());
 
             buf.release();
@@ -246,23 +246,23 @@ public class VanillaMappedFileTest {
     public void testMappedCache1() throws IOException {
         VanillaMappedCache<Integer> cache = new VanillaMappedCache();
 
-        assertEquals(cache.size(),0);
+        assertEquals(cache.size(), 0);
         assertNull(cache.get(1));
 
         cache.put(1, newTempraryFile("vmc-1-v1"), 64);
         cache.put(2, newTempraryFile("vmc-1-v2"), 128);
 
-        assertEquals(cache.size(),2);
+        assertEquals(cache.size(), 2);
 
         assertNotNull(cache.get(1));
         assertNotNull(cache.get(2));
 
         VanillaMappedBytes b1 = cache.get(1);
-        assertEquals(  1, b1.refCount());
-        assertEquals( 64, b1.size());
+        assertEquals(1, b1.refCount());
+        assertEquals(64, b1.size());
 
         VanillaMappedBytes b2 = cache.get(2);
-        assertEquals(  1, b2.refCount());
+        assertEquals(1, b2.refCount());
         assertEquals(128, b2.size());
 
         cache.close();
@@ -272,17 +272,17 @@ public class VanillaMappedFileTest {
     public void testMappedCache2() throws IOException {
         final int size = 5;
         VanillaMappedCache<Integer> cache = new VanillaMappedCache(size, true);
-        for(int i=0;i<10;i++) {
+        for (int i = 0; i < 10; i++) {
             cache.put(i, newTempraryFile("vmc-2-v" + i), 8 * i, i);
-            if(i >= size) {
+            if (i >= size) {
                 assertEquals(cache.size(), size - 1);
             }
         }
 
-        for(int i=10-1;i>=0;i--) {
-            if(i >= 6) {
+        for (int i = 10 - 1; i >= 0; i--) {
+            if (i >= 6) {
                 assertNotNull(cache.get(i));
-                assertEquals(cache.get(i).index(),i);
+                assertEquals(cache.get(i).index(), i);
 
             } else {
                 assertNull(cache.get(i));
@@ -332,13 +332,13 @@ public class VanillaMappedFileTest {
         VanillaMappedBytes buffer = cache.put(1, newTempraryFile("vmc-4"), 256, 1);
 
         buffer.reserve();
-        assertEquals(2,buffer.refCount());
+        assertEquals(2, buffer.refCount());
 
         buffer.release();
-        assertEquals(1,buffer.refCount());
+        assertEquals(1, buffer.refCount());
 
         cache.close();
-        assertEquals(0,buffer.refCount());
+        assertEquals(0, buffer.refCount());
     }
 
     // *************************************************************************
@@ -363,10 +363,12 @@ public class VanillaMappedFileTest {
     public static class MessageKey implements Serializable {
         private String arg1;
         private long arg2;
+
         public MessageKey(String arg1, long arg2) {
             this.arg1 = arg1;
             this.arg2 = arg2;
         }
+
         @Override
         public String toString() {
             return "MessageKey{" + "arg1='" + arg1 + ", arg2=" + arg2 + "}";
