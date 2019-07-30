@@ -61,7 +61,7 @@ public abstract class AbstractBytes implements Bytes {
     static final long RW_WRITE_WAITING = 1L << RW_LOCK_LIMIT;
     static final long RW_WRITE_LOCKED = 1L << 2 * RW_LOCK_LIMIT;
     static final int RW_LOCK_MASK = (1 << RW_LOCK_LIMIT) - 1;
-    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
+    private static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
     private static final long BUSY_LOCK_LIMIT = 20L * 1000 * 1000 * 1000;
     private static final int INT_LOCK_MASK;
     private static final int UNSIGNED_BYTE_MASK = 0xFF;

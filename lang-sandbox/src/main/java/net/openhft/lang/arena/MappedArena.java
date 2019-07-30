@@ -29,7 +29,7 @@ import java.nio.channels.FileChannel;
  * Created by peter.lawrey on 22/06/14.
  */
 public class MappedArena implements Arena {
-    static final byte[] MAGIC = "Arena001".getBytes();
+    private static final byte[] MAGIC = "Arena001".getBytes();
     static final int MAGIC_OFFSET = 0;
     static final int LOCK_OFFSET = MAGIC_OFFSET + 8;
     static final int ALLOCATE_SIZE_OFFSET = LOCK_OFFSET + 8;
