@@ -22,13 +22,14 @@ import net.openhft.lang.io.MappedStore;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 
 /**
  * Created by peter.lawrey on 14/07/14.
  */
 public class MappedStroreExampleMain {
     public static void main(String[] args) throws IOException {
-        File deleteme = File.createTempFile("deleteme", ".tmp");
+        File deleteme = Files.createTempFile("deleteme", ".tmp").toFile();
         deleteme.deleteOnExit();
         // 4 GB of memory.
         long size = 4L << 30;
